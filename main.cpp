@@ -7,40 +7,59 @@
 #include <flecs.h>
 #include <spdlog/spdlog.h>
 
-const uint8_t image_data[] = {
+const uint8_t background_data[] = {
 #embed "jungle.jpg"
 };
 
 static constexpr int WINDOW_WIDTH = 400;
 static constexpr int WINDOW_HEIGHT = 280;
 
+struct SpriteAssets {
+  SDL_Texture *background;
+};
+
+struct SdlHandles {
+  SDL_Window *window;
+  SDL_Renderer *renderer;
+};
+
+auto init_assets(flecs::world &world) -> void {
+  auto *renderer = world.get<SdlHandles>()->renderer;
+
+  auto *background_iostream =
+      SDL_IOFromConstMem(background_data, sizeof(background_data));
+  SDL_Texture *background =
+      IMG_LoadTexture_IO(renderer, background_iostream, false);
+  if (background == nullptr) {
+    spdlog::error("Failed to load SDL texture!\nCause: {}", SDL_GetError());
+  }
+
+  world.set<SpriteAssets>(SpriteAssets{.background = background});
+}
+
 auto main() -> int {
   spdlog::info("Initialize SDL...");
-  bool sdl_success = SDL_Init(SDL_INIT_VIDEO);
-  if (!sdl_success) {
+
+  if (!SDL_Init(SDL_INIT_VIDEO)) {
     spdlog::critical("Failed to initialize SDL!\nCause: {}", SDL_GetError());
     std::terminate();
   }
 
-  auto *sdl_window =
+  auto *window =
       SDL_CreateWindow("HansTheGatherer", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
-  if (sdl_window == nullptr) {
+  if (window == nullptr) {
     spdlog::critical("Failed to create SDL window!\nCause: {}", SDL_GetError());
   }
 
-  auto *sdl_renderer = SDL_CreateRenderer(sdl_window, nullptr);
-  if (sdl_renderer == nullptr) {
+  auto *renderer = SDL_CreateRenderer(window, nullptr);
+  if (renderer == nullptr) {
     spdlog::critical("Failed to create SDL renderer!\nCause: {}",
                      SDL_GetError());
   }
 
   flecs::world world;
-
-  auto *image_iostream = SDL_IOFromConstMem(image_data, sizeof(image_data));
-  SDL_Texture *img = IMG_LoadTexture_IO(sdl_renderer, image_iostream, false);
-  if (img == nullptr) {
-    spdlog::error("Failed to load SDL texture!\nCause: {}", SDL_GetError());
-  }
+  world.set<SdlHandles>(SdlHandles{.window = window, .renderer = renderer});
+  init_assets(world);
 
   bool exit_gameloop = false;
   while (!exit_gameloop) {
@@ -58,13 +77,13 @@ auto main() -> int {
       }
     }
 
-    SDL_RenderClear(sdl_renderer);
-    SDL_RenderTexture(sdl_renderer, img, nullptr, nullptr);
-    SDL_RenderPresent(sdl_renderer);
+    SDL_RenderClear(renderer);
+    SDL_RenderTexture(renderer, world.get<SpriteAssets>()->background, nullptr, nullptr);
+    SDL_RenderPresent(renderer);
   }
 
-  SDL_DestroyRenderer(sdl_renderer);
-  SDL_DestroyWindow(sdl_window);
+  SDL_DestroyRenderer(renderer);
+  SDL_DestroyWindow(window);
   SDL_Quit();
 
   return 0;
