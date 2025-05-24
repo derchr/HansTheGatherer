@@ -1,51 +1,25 @@
+#include "assets.hpp"
+#include "sdl_types.hpp"
+#include "input.hpp"
+
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_iostream.h>
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_video.h>
-#include <SDL3_image/SDL_image.h>
 #include <flecs.h>
-#include <set>
 #include <spdlog/spdlog.h>
-
-const uint8_t background_data[] = {
-#embed "jungle.jpg"
-};
 
 static constexpr int WINDOW_WIDTH = 400;
 static constexpr int WINDOW_HEIGHT = 280;
 
-struct SpriteAssets {
-  SDL_Texture *background;
+struct Position {
+  int x;
+  int y;
 };
 
-struct SdlHandles {
-  SDL_Window *window;
-  SDL_Renderer *renderer;
-};
-
-struct ButtonInput {
-  std::set<SDL_Keycode> pressed;
-  std::set<SDL_Keycode> just_pressed;
-  std::set<SDL_Keycode> just_released;
-};
-
-auto init_assets(flecs::world &world) -> void {
-  auto *renderer = world.get<SdlHandles>()->renderer;
-
-  auto *background_iostream =
-      SDL_IOFromConstMem(background_data, sizeof(background_data));
-  SDL_Texture *background =
-      IMG_LoadTexture_IO(renderer, background_iostream, false);
-  if (background == nullptr) {
-    spdlog::error("Failed to load SDL texture!\nCause: {}", SDL_GetError());
-  }
-
-  world.set<SpriteAssets>(SpriteAssets{.background = background});
-}
-
-auto main() -> int {
+int main() {
   spdlog::info("Initialize SDL...");
 
   if (!SDL_Init(SDL_INIT_VIDEO)) {
