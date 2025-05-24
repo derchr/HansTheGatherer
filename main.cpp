@@ -20,6 +20,15 @@ struct Position {
   int y;
 };
 
+struct Velocity {
+  int x;
+  int y;
+};
+
+struct GameTicks {
+  uint32_t ticks;
+};
+
 int main() {
   spdlog::info("Initialize SDL...");
 
@@ -43,6 +52,7 @@ int main() {
   }
 
   flecs::world world;
+  world.set<GameTicks>(GameTicks{0});
   world.set<ButtonInput>(ButtonInput{});
   world.set<SdlHandles>(SdlHandles{.window = window, .renderer = renderer});
   init_assets(world);
@@ -56,17 +66,46 @@ int main() {
                  .custom_size = Vec2{.x = WINDOW_WIDTH, .y = WINDOW_HEIGHT}});
 
   struct Fruit {};
+  struct Basket {};
 
-  world.entity("Sprite1")
-      .set<Position>(Position{.x = 0, .y = 0})
-      .set<Sprite>(
-          Sprite{.texture = &texture_assets->fruits, .texture_atlas_index = 0})
-      .add<Fruit>();
+  world.system<GameTicks>("IncrementTicks")
+      .term_at(0)
+      .singleton()
+      .each([](GameTicks &game_ticks) { game_ticks.ticks += 1; });
 
-  world.entity("Sprite2")
-      .set<Position>(Position{.x = 32, .y = 32})
-      .set<Sprite>(
-          Sprite{.texture = &texture_assets->fruits, .texture_atlas_index = 5});
+  world.entity("Basket")
+      .set<Position>(
+          Position{.x = WINDOW_WIDTH / 2 - 32, .y = WINDOW_HEIGHT - 32})
+      .set<Sprite>(Sprite{.texture = &texture_assets->fruits,
+                          .texture_atlas_index = 212,
+                          .custom_size = Vec2{.x = 64, .y = 16}})
+      .add<Basket>();
+
+  world.system<GameTicks const, TextureAssets const>("SpawnFruits")
+      .term_at(0)
+      .singleton()
+      .term_at(1)
+      .singleton()
+      .run([](flecs::iter &it) {
+        while (it.next()) {
+          auto game_ticks = it.field<GameTicks const>(0);
+          auto texture_assets = it.field<TextureAssets const>(1);
+
+          if ((game_ticks->ticks % 100) == 0) {
+            it.world()
+                .entity()
+                .set<Position>(Position{
+                    .x = static_cast<int>(game_ticks->ticks % WINDOW_WIDTH),
+                    .y = -16})
+                .set<Velocity>(Velocity{.x = 0, .y = 1})
+                .set<Sprite>(
+                    Sprite{.texture = &texture_assets->fruits,
+                           .texture_atlas_index =
+                               static_cast<uint16_t>(game_ticks->ticks % 228),
+                           .custom_size = Vec2{.x = 32, .y = 32}});
+          }
+        }
+      });
 
   world.system<SdlHandles const, Position const, Sprite const>("RenderSprites")
       .term_at(0)
@@ -92,23 +131,25 @@ int main() {
                           &srcrect, &dstrect);
       });
 
-  world.system<ButtonInput const, Position, Sprite const, Fruit>("MoveSprites")
+  world
+      .system<ButtonInput const, Position, Sprite const, Basket>(
+          "SetSpriteVelocity")
       .term_at(0)
       .singleton()
       .each([](ButtonInput const &input, Position &pos, Sprite const &sprite,
-               Fruit) {
+               Basket) {
         if (input.pressed.contains(SDLK_LEFT)) {
-          pos.x -= 1;
+          pos.x -= 5;
         }
         if (input.pressed.contains(SDLK_RIGHT)) {
-          pos.x += 1;
+          pos.x += 5;
         }
-        if (input.pressed.contains(SDLK_UP)) {
-          pos.y -= 1;
-        }
-        if (input.pressed.contains(SDLK_DOWN)) {
-          pos.y += 1;
-        }
+      });
+
+  world.system<Position, Velocity const>("MoveSprites")
+      .each([](Position &pos, Velocity const &vel) {
+        pos.x += vel.x;
+        pos.y += vel.y;
       });
 
   bool exit_gameloop = false;
