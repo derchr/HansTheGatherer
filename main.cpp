@@ -46,6 +46,13 @@ int main() {
   init_assets(world);
   auto *texture_assets = world.get<TextureAssets>();
 
+  world.entity("Background")
+      .set<Position>(Position{.x = 0, .y = 0})
+      .set<Sprite>(
+          Sprite{.texture = &texture_assets->background,
+                 .texture_atlas_index = 0,
+                 .custom_size = Vec2{.x = WINDOW_WIDTH, .y = WINDOW_HEIGHT}});
+
   world.entity("Sprite1")
       .set<Position>(Position{.x = 0, .y = 0})
       .set<Sprite>(
@@ -56,30 +63,29 @@ int main() {
       .set<Sprite>(
           Sprite{.texture = &texture_assets->fruits, .texture_atlas_index = 5});
 
-  flecs::system sys =
-      world
-          .system<SdlHandles const, Position const, Sprite const>(
-              "RenderSprites")
-          .term_at(0)
-          .singleton()
-          .each([](flecs::entity e, SdlHandles const &sdl_handles,
-                   Position const &pos, Sprite const &sprite) {
-            TextureAtlasLayout layout = sprite.texture->texture_atlas_layout;
-            uint8_t row = sprite.texture_atlas_index / layout.columns;
-            uint8_t column = sprite.texture_atlas_index % layout.columns;
-            SDL_FRect srcrect{static_cast<float>(column * layout.width),
-                              static_cast<float>(row * layout.height),
-                              static_cast<float>(layout.width),
-                              static_cast<float>(layout.height)};
+  world.system<SdlHandles const, Position const, Sprite const>("RenderSprites")
+      .term_at(0)
+      .singleton()
+      .each([](flecs::entity e, SdlHandles const &sdl_handles,
+               Position const &pos, Sprite const &sprite) {
+        TextureAtlasLayout layout = sprite.texture->texture_atlas_layout;
+        uint8_t row = sprite.texture_atlas_index / layout.columns;
+        uint8_t column = sprite.texture_atlas_index % layout.columns;
+        SDL_FRect srcrect{static_cast<float>(column * layout.width),
+                          static_cast<float>(row * layout.height),
+                          static_cast<float>(layout.width),
+                          static_cast<float>(layout.height)};
 
-            SDL_FRect dstrect{static_cast<float>(pos.x),
-                              static_cast<float>(pos.y),
-                              static_cast<float>(layout.width),
-                              static_cast<float>(layout.height)};
+        Vec2 size = sprite.custom_size.value_or(
+            {.x = layout.width, .y = layout.height});
 
-            SDL_RenderTexture(sdl_handles.renderer, sprite.texture->sdl_texture,
-                              &srcrect, &dstrect);
-          });
+        SDL_FRect dstrect{static_cast<float>(pos.x), static_cast<float>(pos.y),
+                          static_cast<float>(size.x),
+                          static_cast<float>(size.y)};
+
+        SDL_RenderTexture(sdl_handles.renderer, sprite.texture->sdl_texture,
+                          &srcrect, &dstrect);
+      });
 
   bool exit_gameloop = false;
   while (!exit_gameloop) {
@@ -121,8 +127,6 @@ int main() {
 
     // Render
     SDL_RenderClear(renderer);
-    SDL_RenderTexture(renderer, texture_assets->background.sdl_texture, nullptr,
-                      nullptr);
     world.progress();
     SDL_RenderPresent(renderer);
   }
