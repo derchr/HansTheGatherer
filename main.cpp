@@ -1,10 +1,12 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_error.h>
+#include <SDL3/SDL_events.h>
 #include <SDL3/SDL_iostream.h>
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_video.h>
 #include <SDL3_image/SDL_image.h>
 #include <flecs.h>
+#include <set>
 #include <spdlog/spdlog.h>
 
 const uint8_t background_data[] = {
@@ -21,6 +23,12 @@ struct SpriteAssets {
 struct SdlHandles {
   SDL_Window *window;
   SDL_Renderer *renderer;
+};
+
+struct ButtonInput {
+  std::set<SDL_Keycode> pressed;
+  std::set<SDL_Keycode> just_pressed;
+  std::set<SDL_Keycode> just_released;
 };
 
 auto init_assets(flecs::world &world) -> void {
@@ -58,11 +66,19 @@ auto main() -> int {
   }
 
   flecs::world world;
+  world.set<ButtonInput>(ButtonInput{});
   world.set<SdlHandles>(SdlHandles{.window = window, .renderer = renderer});
   init_assets(world);
 
   bool exit_gameloop = false;
   while (!exit_gameloop) {
+    auto *input = world.get_mut<ButtonInput>();
+
+    // Clear just pressed/released
+    input->just_pressed.clear();
+    input->just_released.clear();
+
+    // Input
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
       switch (event.type) {
@@ -73,12 +89,29 @@ auto main() -> int {
         if (event.key.key == SDLK_ESCAPE) {
           exit_gameloop = true;
         }
+        if (input->pressed.insert(event.key.key).second) {
+          input->just_pressed.insert(event.key.key);
+        }
+        break;
+      case SDL_EVENT_KEY_UP:
+        if (input->pressed.erase(event.key.key) != 0) {
+          input->just_released.insert(event.key.key);
+        }
         break;
       }
     }
 
+    // Game Logic
+    if (input->just_pressed.contains(SDLK_X))
+      spdlog::info("X pressed!");
+
+    if (input->just_released.contains(SDLK_X))
+      spdlog::info("X released!");
+
+    // Render
     SDL_RenderClear(renderer);
-    SDL_RenderTexture(renderer, world.get<SpriteAssets>()->background, nullptr, nullptr);
+    SDL_RenderTexture(renderer, world.get<SpriteAssets>()->background, nullptr,
+                      nullptr);
     SDL_RenderPresent(renderer);
   }
 
