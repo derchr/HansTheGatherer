@@ -1,10 +1,10 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_render.h>
+#include <flecs.h>
 #include <spdlog/spdlog.h>
 
-const uint8_t image_data[] =
-{
+const uint8_t image_data[] = {
 #embed "main.cpp"
 };
 
@@ -26,6 +26,8 @@ auto main() -> int {
     spdlog::critical("Failed to create SDL renderer!\nCause: {}",
                      SDL_GetError());
   }
+
+  flecs::world world;
 
   bool exit_gameloop = false;
   while (!exit_gameloop) {

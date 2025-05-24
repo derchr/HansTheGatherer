@@ -1,0 +1,8 @@
+{
+  "dependencies": [
+    "spdlog",
+    "sdl3",
+    "spdlog",
+    "flecs"
+  ]
+}
