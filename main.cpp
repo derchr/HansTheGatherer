@@ -23,6 +23,8 @@ struct Position {
 int main() {
   spdlog::info("Initialize SDL...");
 
+  SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
+
   if (!SDL_Init(SDL_INIT_VIDEO)) {
     spdlog::critical("Failed to initialize SDL!\nCause: {}", SDL_GetError());
     std::terminate();
@@ -53,10 +55,13 @@ int main() {
                  .texture_atlas_index = 0,
                  .custom_size = Vec2{.x = WINDOW_WIDTH, .y = WINDOW_HEIGHT}});
 
+  struct Fruit {};
+
   world.entity("Sprite1")
       .set<Position>(Position{.x = 0, .y = 0})
       .set<Sprite>(
-          Sprite{.texture = &texture_assets->fruits, .texture_atlas_index = 0});
+          Sprite{.texture = &texture_assets->fruits, .texture_atlas_index = 0})
+      .add<Fruit>();
 
   world.entity("Sprite2")
       .set<Position>(Position{.x = 32, .y = 32})
@@ -66,8 +71,8 @@ int main() {
   world.system<SdlHandles const, Position const, Sprite const>("RenderSprites")
       .term_at(0)
       .singleton()
-      .each([](flecs::entity e, SdlHandles const &sdl_handles,
-               Position const &pos, Sprite const &sprite) {
+      .each([](SdlHandles const &sdl_handles, Position const &pos,
+               Sprite const &sprite) {
         TextureAtlasLayout layout = sprite.texture->texture_atlas_layout;
         uint8_t row = sprite.texture_atlas_index / layout.columns;
         uint8_t column = sprite.texture_atlas_index % layout.columns;
@@ -85,6 +90,25 @@ int main() {
 
         SDL_RenderTexture(sdl_handles.renderer, sprite.texture->sdl_texture,
                           &srcrect, &dstrect);
+      });
+
+  world.system<ButtonInput const, Position, Sprite const, Fruit>("MoveSprites")
+      .term_at(0)
+      .singleton()
+      .each([](ButtonInput const &input, Position &pos, Sprite const &sprite,
+               Fruit) {
+        if (input.pressed.contains(SDLK_LEFT)) {
+          pos.x -= 1;
+        }
+        if (input.pressed.contains(SDLK_RIGHT)) {
+          pos.x += 1;
+        }
+        if (input.pressed.contains(SDLK_UP)) {
+          pos.y -= 1;
+        }
+        if (input.pressed.contains(SDLK_DOWN)) {
+          pos.y += 1;
+        }
       });
 
   bool exit_gameloop = false;
@@ -119,11 +143,6 @@ int main() {
     }
 
     // Game Logic
-    if (input->just_pressed.contains(SDLK_X))
-      spdlog::info("X pressed!");
-
-    if (input->just_released.contains(SDLK_X))
-      spdlog::info("X released!");
 
     // Render
     SDL_RenderClear(renderer);
