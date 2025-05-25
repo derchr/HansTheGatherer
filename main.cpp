@@ -34,7 +34,7 @@ int main() {
 
   SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
 
-  if (!SDL_Init(SDL_INIT_VIDEO)) {
+  if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
     spdlog::critical("Failed to initialize SDL!\nCause: {}", SDL_GetError());
     std::terminate();
   }
@@ -152,6 +152,15 @@ int main() {
         pos.y += vel.y;
       });
 
+    auto *audio_assets = world.get<AudioAssets>();
+    auto *stream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &audio_assets->background_music.spec, NULL, NULL);
+    if (!stream) {
+        SDL_Log("Couldn't create audio stream: %s", SDL_GetError());
+        return SDL_APP_FAILURE;
+    }
+
+    SDL_ResumeAudioStreamDevice(stream);
+
   bool exit_gameloop = false;
   while (!exit_gameloop) {
     auto *input = world.get_mut<ButtonInput>();
@@ -184,6 +193,9 @@ int main() {
     }
 
     // Game Logic
+    if (SDL_GetAudioStreamQueued(stream) < (int)audio_assets->background_music.buffer_length) {
+        SDL_PutAudioStreamData(stream, audio_assets->background_music.buffer, audio_assets->background_music.buffer_length);
+    }
 
     // Render
     SDL_RenderClear(renderer);

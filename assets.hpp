@@ -1,5 +1,7 @@
 #pragma once
 
+#include "audio.hpp"
+
 #include <SDL3/SDL.h>
 #include <flecs.h>
 
@@ -18,6 +20,10 @@ struct Texture {
 struct TextureAssets {
   Texture background;
   Texture fruits;
+};
+
+struct AudioAssets {
+  AudioAsset background_music;
 };
 
 void init_assets(flecs::world &world);
