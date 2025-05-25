@@ -25,7 +25,12 @@ struct Velocity {
   int y;
 };
 
-struct GameTicks {
+struct Size {
+  int w;
+  int h;
+};
+
+struct Game {
   uint32_t ticks;
 };
 
@@ -52,7 +57,7 @@ int main() {
   }
 
   flecs::world world;
-  world.set<GameTicks>(GameTicks{0});
+  world.set<Game>(Game{.ticks = 0});
   world.set<ButtonInput>(ButtonInput{});
   world.set<SdlHandles>(SdlHandles{.window = window, .renderer = renderer});
   init_assets(world);
@@ -60,58 +65,53 @@ int main() {
 
   world.entity("Background")
       .set<Position>(Position{.x = 0, .y = 0})
-      .set<Sprite>(
-          Sprite{.texture = &texture_assets->background,
-                 .texture_atlas_index = 0,
-                 .custom_size = Vec2{.x = WINDOW_WIDTH, .y = WINDOW_HEIGHT}});
+      .set<Sprite>(Sprite{.texture = &texture_assets->background,
+                          .texture_atlas_index = 0})
+      .set<Size>(Size{.w = WINDOW_WIDTH, .h = WINDOW_HEIGHT});
 
   struct Fruit {};
   struct Basket {};
 
-  world.system<GameTicks>("IncrementTicks")
+  world.system<Game>("IncrementTicks")
       .term_at(0)
       .singleton()
-      .each([](GameTicks &game_ticks) { game_ticks.ticks += 1; });
+      .each([](Game &game_ticks) { game_ticks.ticks += 1; });
 
   world.entity("Basket")
       .set<Position>(
           Position{.x = WINDOW_WIDTH / 2 - 32, .y = WINDOW_HEIGHT - 32})
       .set<Sprite>(Sprite{.texture = &texture_assets->fruits,
-                          .texture_atlas_index = 212,
-                          .custom_size = Vec2{.x = 64, .y = 16}})
+                          .texture_atlas_index = 212})
+      .set<Size>(Size{.w = 64, .h = 16})
       .add<Basket>();
 
-  world.system<GameTicks const, TextureAssets const>("SpawnFruits")
+  world.system<Game const, TextureAssets const>("SpawnFruits")
       .term_at(0)
       .singleton()
       .term_at(1)
       .singleton()
-      .run([](flecs::iter &it) {
-        while (it.next()) {
-          auto game_ticks = it.field<GameTicks const>(0);
-          auto texture_assets = it.field<TextureAssets const>(1);
-
-          if ((game_ticks->ticks % 100) == 0) {
-            it.world()
-                .entity()
-                .set<Position>(Position{
-                    .x = static_cast<int>(game_ticks->ticks % WINDOW_WIDTH),
-                    .y = -16})
-                .set<Velocity>(Velocity{.x = 0, .y = 1})
-                .set<Sprite>(
-                    Sprite{.texture = &texture_assets->fruits,
-                           .texture_atlas_index =
-                               static_cast<uint16_t>(game_ticks->ticks % 228),
-                           .custom_size = Vec2{.x = 32, .y = 32}});
-          }
+      .each([](flecs::iter &it, size_t index, Game const &game,
+               TextureAssets const &texture_assets) {
+        if ((game.ticks % 100) == 0) {
+          it.world()
+              .entity()
+              .set<Position>(Position{
+                  .x = static_cast<int>(game.ticks % WINDOW_WIDTH), .y = -16})
+              .set<Velocity>(Velocity{.x = 0, .y = 1})
+              .set<Sprite>(Sprite{.texture = &texture_assets.fruits,
+                                  .texture_atlas_index =
+                                      static_cast<uint16_t>(game.ticks % 228)})
+              .set<Size>(Size{.w = 16, .h = 16});
         }
       });
 
-  world.system<SdlHandles const, Position const, Sprite const>("RenderSprites")
+  world
+      .system<SdlHandles const, Position const, Size const, Sprite const>(
+          "RenderSprites")
       .term_at(0)
       .singleton()
       .each([](SdlHandles const &sdl_handles, Position const &pos,
-               Sprite const &sprite) {
+               Size const &size, Sprite const &sprite) {
         TextureAtlasLayout layout = sprite.texture->texture_atlas_layout;
         uint8_t row = sprite.texture_atlas_index / layout.columns;
         uint8_t column = sprite.texture_atlas_index % layout.columns;
@@ -120,30 +120,30 @@ int main() {
                           static_cast<float>(layout.width),
                           static_cast<float>(layout.height)};
 
-        Vec2 size = sprite.custom_size.value_or(
-            {.x = layout.width, .y = layout.height});
-
         SDL_FRect dstrect{static_cast<float>(pos.x), static_cast<float>(pos.y),
-                          static_cast<float>(size.x),
-                          static_cast<float>(size.y)};
+                          static_cast<float>(size.w),
+                          static_cast<float>(size.h)};
 
         SDL_RenderTexture(sdl_handles.renderer, sprite.texture->sdl_texture,
                           &srcrect, &dstrect);
       });
 
   world
-      .system<ButtonInput const, Position, Sprite const, Basket>(
-          "SetSpriteVelocity")
+      .system<ButtonInput const, Position, Size const, Sprite const, Basket>(
+          "MoveBasket")
       .term_at(0)
       .singleton()
-      .each([](ButtonInput const &input, Position &pos, Sprite const &sprite,
-               Basket) {
+      .each([](ButtonInput const &input, Position &pos, Size const &size,
+               Sprite const &sprite, Basket) {
         if (input.pressed.contains(SDLK_LEFT)) {
           pos.x -= 5;
         }
         if (input.pressed.contains(SDLK_RIGHT)) {
           pos.x += 5;
         }
+
+        pos.x = pos.x < 0 ? 0 : pos.x;
+        pos.x = pos.x > WINDOW_WIDTH - size.w ? WINDOW_WIDTH - size.w : pos.x;
       });
 
   world.system<Position, Velocity const>("MoveSprites")
@@ -152,14 +152,16 @@ int main() {
         pos.y += vel.y;
       });
 
-    auto *audio_assets = world.get<AudioAssets>();
-    auto *stream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &audio_assets->background_music.spec, NULL, NULL);
-    if (!stream) {
-        SDL_Log("Couldn't create audio stream: %s", SDL_GetError());
-        return SDL_APP_FAILURE;
-    }
+  auto *audio_assets = world.get<AudioAssets>();
+  auto *stream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK,
+                                           &audio_assets->background_music.spec,
+                                           NULL, NULL);
+  if (!stream) {
+    SDL_Log("Couldn't create audio stream: %s", SDL_GetError());
+    return SDL_APP_FAILURE;
+  }
 
-    SDL_ResumeAudioStreamDevice(stream);
+  SDL_ResumeAudioStreamDevice(stream);
 
   bool exit_gameloop = false;
   while (!exit_gameloop) {
@@ -193,8 +195,10 @@ int main() {
     }
 
     // Game Logic
-    if (SDL_GetAudioStreamQueued(stream) < (int)audio_assets->background_music.buffer_length) {
-        SDL_PutAudioStreamData(stream, audio_assets->background_music.buffer, audio_assets->background_music.buffer_length);
+    if (SDL_GetAudioStreamQueued(stream) <
+        (int)audio_assets->background_music.buffer_length) {
+      SDL_PutAudioStreamData(stream, audio_assets->background_music.buffer,
+                             audio_assets->background_music.buffer_length);
     }
 
     // Render
