@@ -13,7 +13,7 @@
 #include <spdlog/spdlog.h>
 
 static constexpr int WINDOW_WIDTH = 400;
-static constexpr int WINDOW_HEIGHT = 280;
+static constexpr int WINDOW_HEIGHT = 240;
 
 struct Position {
   int x;
