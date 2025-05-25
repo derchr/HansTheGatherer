@@ -82,7 +82,7 @@ int main() {
           Position{.x = WINDOW_WIDTH / 2 - 32, .y = WINDOW_HEIGHT - 32})
       .set<Sprite>(Sprite{.texture = &texture_assets->fruits,
                           .texture_atlas_index = 212})
-      .set<Size>(Size{.w = 64, .h = 16})
+      .set<Size>(Size{.w = 72, .h = 32})
       .add<Basket>();
 
   world.system<Game const, TextureAssets const>("SpawnFruits")
@@ -101,7 +101,7 @@ int main() {
               .set<Sprite>(Sprite{.texture = &texture_assets.fruits,
                                   .texture_atlas_index =
                                       static_cast<uint16_t>(game.ticks % 228)})
-              .set<Size>(Size{.w = 16, .h = 16});
+              .set<Size>(Size{.w = 32, .h = 32});
         }
       });
 

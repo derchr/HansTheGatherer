@@ -2,16 +2,15 @@
 #include "audio.hpp"
 #include "sdl_types.hpp"
 
-#include <SDL3_image/SDL_image.h>
 #include <cstdint>
 #include <spdlog/spdlog.h>
 
 static constexpr uint8_t BACKGROUND_DATA[] = {
-#embed "assets/images/jungle.jpg"
+#embed "assets/images/jungle.bmp"
 };
 
 static constexpr uint8_t FRUITS_DATA[] = {
-#embed "assets/images/fruits.jpg"
+#embed "assets/images/fruits.bmp"
 };
 
 static constexpr uint8_t BACKGROUND_MUSIC_DATA[] = {
@@ -21,9 +20,15 @@ static constexpr uint8_t BACKGROUND_MUSIC_DATA[] = {
 SDL_Texture *load_texture(uint8_t const *data, size_t size,
                           SDL_Renderer *renderer) {
   auto *iostream = SDL_IOFromConstMem(data, size);
-  SDL_Texture *texture = IMG_LoadTexture_IO(renderer, iostream, false);
+  SDL_Surface *surface = SDL_LoadBMP_IO(iostream, false);
+  if (surface == nullptr) {
+    spdlog::error("Failed to load SDL surface!\nCause: {}", SDL_GetError());
+  }
+
+  SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
   if (texture == nullptr) {
-    spdlog::error("Failed to load SDL texture!\nCause: {}", SDL_GetError());
+    spdlog::error("Failed to create texture from surface!\nCause: {}",
+                  SDL_GetError());
   }
 
   return texture;

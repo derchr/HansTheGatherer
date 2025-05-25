@@ -2,10 +2,6 @@
   "dependencies": [
     "spdlog",
     "sdl3",
-    {
-      "name": "sdl3-image",
-      "features": ["jpeg"]
-    },
     "spdlog",
     "flecs"
   ]
