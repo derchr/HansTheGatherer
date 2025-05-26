@@ -20,6 +20,7 @@ struct Texture {
 struct TextureAssets {
   Texture background;
   Texture fruits;
+  Texture basket;
 };
 
 struct AudioAssets {

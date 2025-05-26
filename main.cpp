@@ -80,9 +80,9 @@ int main() {
   world.entity("Basket")
       .set<Position>(
           Position{.x = WINDOW_WIDTH / 2 - 32, .y = WINDOW_HEIGHT - 32})
-      .set<Sprite>(Sprite{.texture = &texture_assets->fruits,
-                          .texture_atlas_index = 212})
-      .set<Size>(Size{.w = 72, .h = 32})
+      .set<Sprite>(Sprite{.texture = &texture_assets->basket,
+                          .texture_atlas_index = 0})
+      .set<Size>(Size{.w = 64, .h = 32})
       .add<Basket>();
 
   world.system<Game const, TextureAssets const>("SpawnFruits")

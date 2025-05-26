@@ -13,6 +13,10 @@ static constexpr uint8_t FRUITS_DATA[] = {
 #embed "assets/images/fruits.bmp"
 };
 
+static constexpr uint8_t BASKET_DATA[] = {
+#embed "assets/images/basket.bmp"
+};
+
 static constexpr uint8_t BACKGROUND_MUSIC_DATA[] = {
 #embed "assets/sounds/JamaicanSunrise.wav"
 };
@@ -58,11 +62,17 @@ void init_assets(flecs::world &world) {
   TextureAtlasLayout fruits_layout = {
       .width = 16, .height = 16, .rows = 6, .columns = 38};
 
+  auto *basket = load_texture(BASKET_DATA, sizeof(BASKET_DATA), renderer);
+  TextureAtlasLayout basket_layout = {
+      .width = 16, .height = 16, .rows = 1, .columns = 1};
+
   world.set<TextureAssets>(TextureAssets{
       .background = Texture{.sdl_texture = background,
                             .texture_atlas_layout = background_layout},
-      .fruits = Texture{.sdl_texture = fruits,
-                        .texture_atlas_layout = fruits_layout}});
+      .fruits =
+          Texture{.sdl_texture = fruits, .texture_atlas_layout = fruits_layout},
+      .basket = Texture{.sdl_texture = basket,
+                        .texture_atlas_layout = basket_layout}});
 
   auto background_music =
       load_audio(BACKGROUND_MUSIC_DATA, sizeof(BACKGROUND_MUSIC_DATA));
