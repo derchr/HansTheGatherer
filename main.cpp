@@ -158,6 +158,23 @@ int main() {
         }
       });
 
+  world.system<WorldPosition const, Size const, CollisionBox>("CollisionCheck")
+      .each([](flecs::iter &it, size_t index, WorldPosition const &world_pos,
+               Size const &size, CollisionBox) {
+        auto basket_box = it.world().lookup("Basket::CollisionBox");
+        if (it.entity(index) == basket_box)
+          return;
+
+        auto basket_box_pos = basket_box.get<WorldPosition>();
+        auto basket_box_size = basket_box.get<Size>();
+
+        if (basket_box_pos->x + basket_box_size->w >= world_pos.x &&
+            basket_box_pos->x <= world_pos.x + size.w &&
+            basket_box_pos->y + basket_box_size->h >= world_pos.y &&
+            basket_box_pos->y <= world_pos.y + size.h) {
+          spdlog::info("collision");
+        }
+      });
   world
       .system<SdlHandles const, Position const, Size const, Sprite const>(
           "RenderSprites")
