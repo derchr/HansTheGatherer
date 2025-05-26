@@ -15,6 +15,11 @@
 static constexpr int WINDOW_WIDTH = 400;
 static constexpr int WINDOW_HEIGHT = 240;
 
+struct WorldPosition {
+  int x;
+  int y;
+};
+
 struct Position {
   int x;
   int y;
@@ -71,19 +76,41 @@ int main() {
 
   struct Fruit {};
   struct Basket {};
+  struct CollisionBox {};
 
   world.system<Game>("IncrementTicks")
       .term_at(0)
       .singleton()
       .each([](Game &game_ticks) { game_ticks.ticks += 1; });
 
-  world.entity("Basket")
-      .set<Position>(
-          Position{.x = WINDOW_WIDTH / 2 - 32, .y = WINDOW_HEIGHT - 32})
-      .set<Sprite>(Sprite{.texture = &texture_assets->basket,
-                          .texture_atlas_index = 0})
+  auto basket = world.entity("Basket")
+                    .add<WorldPosition>()
+                    .set<Position>(Position{.x = WINDOW_WIDTH / 2 - 32,
+                                            .y = WINDOW_HEIGHT - 32})
+                    .set<Sprite>(Sprite{.texture = &texture_assets->basket,
+                                        .texture_atlas_index = 0})
+                    .set<Size>(Size{.w = 64, .h = 32})
+                    .add<Basket>();
+
+  world.entity("CollisionBox")
+      .child_of(basket)
+      .add<WorldPosition>()
+      .set<Position>(Position{.x = 0, .y = 0})
       .set<Size>(Size{.w = 64, .h = 32})
-      .add<Basket>();
+      .add<CollisionBox>();
+
+  world
+      .system<SdlHandles const, WorldPosition const, Size const, CollisionBox>(
+          "DrawBoxes")
+      .term_at(0)
+      .singleton()
+      .each([](SdlHandles const &sdl_handles, WorldPosition const &pos,
+               Size const &size, CollisionBox) {
+        SDL_FRect rect{static_cast<float>(pos.x), static_cast<float>(pos.y),
+                       static_cast<float>(size.w), static_cast<float>(size.h)};
+        SDL_SetRenderDrawColor(sdl_handles.renderer, 0, 0, 255, 255);
+        SDL_RenderRect(sdl_handles.renderer, &rect);
+      });
 
   world.system<Game const, TextureAssets const>("SpawnFruits")
       .term_at(0)
@@ -93,21 +120,48 @@ int main() {
       .each([](flecs::iter &it, size_t index, Game const &game,
                TextureAssets const &texture_assets) {
         if ((game.ticks % 100) == 0) {
+          auto fruit =
+              it.world()
+                  .entity()
+                  .add<WorldPosition>()
+                  .set<Position>(
+                      Position{.x = static_cast<int>(game.ticks % WINDOW_WIDTH),
+                               .y = -16})
+                  .set<Velocity>(Velocity{.x = 0, .y = 1})
+                  .set<Sprite>(
+                      Sprite{.texture = &texture_assets.fruits,
+                             .texture_atlas_index =
+                                 static_cast<uint16_t>(game.ticks % 228)})
+                  .set<Size>(Size{.w = 32, .h = 32});
+
           it.world()
-              .entity()
-              .set<Position>(Position{
-                  .x = static_cast<int>(game.ticks % WINDOW_WIDTH), .y = -16})
-              .set<Velocity>(Velocity{.x = 0, .y = 1})
-              .set<Sprite>(Sprite{.texture = &texture_assets.fruits,
-                                  .texture_atlas_index =
-                                      static_cast<uint16_t>(game.ticks % 228)})
-              .set<Size>(Size{.w = 32, .h = 32});
+              .entity("CollisionBox")
+              .child_of(fruit)
+              .add<WorldPosition>()
+              .set<Position>(Position{.x = 0, .y = 0})
+              .set<Size>(Size{.w = 32, .h = 32})
+              .add<CollisionBox>();
+        }
+      });
+
+  world.system<WorldPosition, Position const>("PropagatePosition")
+      .kind(flecs::PostUpdate)
+      .each([](flecs::entity e, WorldPosition &world_pos,
+               Position const &local_pos) {
+        if (e.parent() == flecs::entity::null()) {
+          world_pos.x = local_pos.x;
+          world_pos.y = local_pos.y;
+        } else {
+          auto parent_world_pos = e.parent().get<WorldPosition>();
+          world_pos.x = parent_world_pos->x + local_pos.x;
+          world_pos.y = parent_world_pos->y + local_pos.y;
         }
       });
 
   world
       .system<SdlHandles const, Position const, Size const, Sprite const>(
           "RenderSprites")
+      .kind(flecs::PreUpdate)
       .term_at(0)
       .singleton()
       .each([](SdlHandles const &sdl_handles, Position const &pos,
