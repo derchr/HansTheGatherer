@@ -38,6 +38,7 @@ add_executable(HansTheGatherer
     src/audio.cpp
     src/assets.cpp
     src/physics.cpp
+    src/render.cpp
 )
 
 target_link_libraries(HansTheGatherer SDL3::SDL3 SDL3_ttf::SDL3_ttf flecs::flecs spdlog::spdlog)
