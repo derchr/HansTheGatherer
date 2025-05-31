@@ -13,6 +13,10 @@ static constexpr uint8_t FRUITS_DATA[] = {
 #embed "../assets/images/fruits.bmp"
 };
 
+static constexpr uint8_t SPIDERS_DATA[] = {
+#embed "../assets/images/spiders.bmp"
+};
+
 static constexpr uint8_t BASKET_DATA[] = {
 #embed "../assets/images/basket.bmp"
 };
@@ -79,12 +83,16 @@ AssetModule::AssetModule(flecs::world& world)
     auto* fruits = load_texture(FRUITS_DATA, sizeof(FRUITS_DATA), renderer);
     TextureAtlasLayout fruits_layout = {.width = 16, .height = 16, .rows = 6, .columns = 38};
 
+    auto* spiders = load_texture(SPIDERS_DATA, sizeof(SPIDERS_DATA), renderer);
+    TextureAtlasLayout spiders_layout = {.width = 16, .height = 16, .rows = 2, .columns = 4};
+
     auto* basket = load_texture(BASKET_DATA, sizeof(BASKET_DATA), renderer);
     TextureAtlasLayout basket_layout = {.width = 16, .height = 16, .rows = 1, .columns = 1};
 
     world.set<TextureAssets>(TextureAssets{
         .background = Texture{.sdl_texture = background, .texture_atlas_layout = background_layout},
         .fruits = Texture{.sdl_texture = fruits, .texture_atlas_layout = fruits_layout},
+        .spiders = Texture{.sdl_texture = spiders, .texture_atlas_layout = spiders_layout},
         .basket = Texture{.sdl_texture = basket, .texture_atlas_layout = basket_layout}});
 
     auto background_music = load_audio(BACKGROUND_MUSIC_DATA, sizeof(BACKGROUND_MUSIC_DATA));

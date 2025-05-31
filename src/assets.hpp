@@ -24,6 +24,7 @@ struct TextureAssets
 {
     Texture background;
     Texture fruits;
+    Texture spiders;
     Texture basket;
 };
 

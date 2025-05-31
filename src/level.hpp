@@ -12,6 +12,10 @@ struct Fruit
 {
 };
 
+struct Spider
+{
+};
+
 struct Basket
 {
 };
@@ -53,23 +57,44 @@ struct LevelModule
                    Game const& game,
                    TextureAssets const& texture_assets)
                 {
-                    if ((game.ticks % 40) == 0)
-                    {
-                        auto fruit =
-                            it.world()
-                                .entity()
-                                .add<Fruit>()
-                                .add<WorldPosition>()
-                                .set<Position>(Position{.x = std::rand() % WINDOW_WIDTH, .y = -16})
-                                .set<Velocity>(Velocity{.x = 0, .y = 2})
-                                .set<Sprite>(Sprite{.texture = &texture_assets.fruits,
-                                                    .texture_atlas_index =
-                                                        static_cast<uint16_t>(game.ticks % 228)})
-                                .set<Size>(Size{.w = 32, .h = 32});
+                    bool spider = std::rand() % 3 == 0;
+                    int vel = std::rand() % 3 + 1;
 
+                    if ((game.ticks % 50) == 0)
+                    {
+                        flecs::entity e;
+                        if (!spider)
+                        {
+                            e = it.world()
+                                    .entity()
+                                    .add<Fruit>()
+                                    .add<WorldPosition>()
+                                    .set<Position>(
+                                        Position{.x = std::rand() % WINDOW_WIDTH, .y = -16})
+                                    .set<Velocity>(Velocity{.x = 0, .y = vel})
+                                    .set<Sprite>(
+                                        Sprite{.texture = &texture_assets.fruits,
+                                               .texture_atlas_index =
+                                                   static_cast<uint16_t>(std::rand() % 228)})
+                                    .set<Size>(Size{.w = 32, .h = 32});
+                        }
+                        else
+                        {
+                            e = it.world()
+                                    .entity()
+                                    .add<Spider>()
+                                    .add<WorldPosition>()
+                                    .set<Position>(
+                                        Position{.x = std::rand() % WINDOW_WIDTH, .y = -16})
+                                    .set<Velocity>(Velocity{.x = 0, .y = vel})
+                                    .set<Sprite>(Sprite{.texture = &texture_assets.spiders,
+                                                        .texture_atlas_index =
+                                                            static_cast<uint16_t>(std::rand() % 8)})
+                                    .set<Size>(Size{.w = 32, .h = 32});
+                        }
                         it.world()
                             .entity("CollisionBox")
-                            .child_of(fruit)
+                            .child_of(e)
                             .add<WorldPosition>()
                             .set<Position>(Position{.x = 0, .y = 0})
                             .set<Size>(Size{.w = 32, .h = 32})
@@ -86,13 +111,23 @@ struct LevelModule
         //                 e.destruct();
         //         });
 
-        world.system<Game, Position, Fruit, Collided>("CollectItem")
+        world.system<Game, Position, Fruit, Collided>("CollectFruit")
             .term_at(0)
             .singleton()
             .each(
                 [](flecs::entity e, Game& game, Position& pos, Fruit, Collided)
                 {
                     game.score += 10;
+                    pos.x = 1000;
+                });
+
+        world.system<Game, Position, Spider, Collided>("CollectSpider")
+            .term_at(0)
+            .singleton()
+            .each(
+                [](flecs::entity e, Game& game, Position& pos, Spider, Collided)
+                {
+                    game.score -= 50;
                     pos.x = 1000;
                 });
 
