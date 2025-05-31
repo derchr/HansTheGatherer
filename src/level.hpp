@@ -53,16 +53,15 @@ struct LevelModule
                    Game const& game,
                    TextureAssets const& texture_assets)
                 {
-                    if ((game.ticks % 100) == 0)
+                    if ((game.ticks % 40) == 0)
                     {
                         auto fruit =
                             it.world()
                                 .entity()
                                 .add<Fruit>()
                                 .add<WorldPosition>()
-                                .set<Position>(Position{
-                                    .x = static_cast<int>(game.ticks % WINDOW_WIDTH), .y = -16})
-                                .set<Velocity>(Velocity{.x = 0, .y = 1})
+                                .set<Position>(Position{.x = std::rand() % WINDOW_WIDTH, .y = -16})
+                                .set<Velocity>(Velocity{.x = 0, .y = 2})
                                 .set<Sprite>(Sprite{.texture = &texture_assets.fruits,
                                                     .texture_atlas_index =
                                                         static_cast<uint16_t>(game.ticks % 228)})
