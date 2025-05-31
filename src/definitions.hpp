@@ -14,4 +14,5 @@ struct SdlHandles
 struct Game
 {
     uint32_t ticks;
+    uint32_t score;
 };

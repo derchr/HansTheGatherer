@@ -1,5 +1,4 @@
 #include "physics.hpp"
-#include "definitions.hpp"
 #include "level.hpp"
 
 #include <spdlog/spdlog.h>
@@ -47,23 +46,6 @@ PhysicsModule::PhysicsModule(flecs::world& world)
                 propagate_to_children(e, world_pos);
             });
 
-    world.system<SdlHandles const, WorldPosition const, Size const, CollisionBox>("DrawBoxes")
-        .term_at(0)
-        .singleton()
-        .each(
-            [](SdlHandles const& sdl_handles,
-               WorldPosition const& pos,
-               Size const& size,
-               CollisionBox)
-            {
-                SDL_FRect rect{static_cast<float>(pos.x),
-                               static_cast<float>(pos.y),
-                               static_cast<float>(size.w),
-                               static_cast<float>(size.h)};
-                SDL_SetRenderDrawColor(sdl_handles.renderer, 0, 0, 255, 255);
-                SDL_RenderRect(sdl_handles.renderer, &rect);
-            });
-
     auto basket_query = world.query<Basket>();
 
     world.system<WorldPosition const, Size const, CollisionBox>("CollisionCheck")
@@ -75,8 +57,10 @@ PhysicsModule::PhysicsModule(flecs::world& world)
                 if (e.parent().has<Basket>())
                     return;
 
-                basket_query.first().children(
-                    [world_pos, size](flecs::entity basket_child)
+                auto fruit = e.parent();
+                auto basket = basket_query.first();
+                basket.children(
+                    [fruit, world_pos, size](flecs::entity basket_child)
                     {
                         if (!basket_child.has<CollisionBox>())
                             return;
@@ -89,7 +73,7 @@ PhysicsModule::PhysicsModule(flecs::world& world)
                             basket_child_pos->y + basket_child_size->h >= world_pos.y &&
                             basket_child_pos->y <= world_pos.y + size.h)
                         {
-                            spdlog::info("collision");
+                            fruit.add<Collided>();
                         }
                     });
             });

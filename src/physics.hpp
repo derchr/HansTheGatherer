@@ -30,6 +30,10 @@ struct CollisionBox
 {
 };
 
+struct Collided
+{
+};
+
 struct PhysicsModule
 {
     PhysicsModule(flecs::world& world);

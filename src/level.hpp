@@ -6,6 +6,7 @@
 #include "sprite.hpp"
 
 #include <flecs.h>
+#include <spdlog/spdlog.h>
 
 struct Fruit
 {
@@ -78,12 +79,18 @@ struct LevelModule
                 });
 
         // world.system<WorldPosition const, Fruit>("DespawnFruits")
+        //     .kind(flecs::OnValidate)
         //     .each(
         //         [](flecs::entity e, WorldPosition const& pos, Fruit)
         //         {
         //             if (pos.y >= WINDOW_HEIGHT)
         //                 e.destruct();
         //         });
+
+        world.system<Game, Fruit, Collided>("CollectItem")
+            .term_at(0)
+            .singleton()
+            .each([](flecs::entity e, Game& game, Fruit, Collided) { game.score += 10; });
 
         world.system<ButtonInput const, Position, Size const, Sprite const, Basket>("MoveBasket")
             .term_at(0)
