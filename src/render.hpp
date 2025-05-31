@@ -1,8 +1,11 @@
 #pragma once
 
-#include <flecs.h>
+#include <entt/entt.hpp>
 
 struct RenderModule
 {
-    RenderModule(flecs::world& world);
+    RenderModule(entt::registry& registry);
+
+    static void RenderSprites(entt::registry& registry);
+    static void RenderScore(entt::registry& registry);
 };

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <flecs.h>
+#include <entt/entt.hpp>
 
 struct WorldPosition
 {
@@ -26,6 +26,16 @@ struct Size
     int h;
 };
 
+struct Parent
+{
+    entt::entity parent;
+};
+
+struct Children
+{
+    std::vector<entt::entity> children;
+};
+
 struct CollisionBox
 {
 };
@@ -34,12 +44,12 @@ struct Collided
 {
 };
 
-struct TranslateSystem
-{
-    flecs::system translate_system;
-};
-
 struct PhysicsModule
 {
-    PhysicsModule(flecs::world& world);
+    PhysicsModule(entt::registry& registry);
+
+    static void TranslatePhysicsObject(entt::registry& registry);
+    static void PropagatePosition(entt::registry& registry);
+    static void RemoveCollisionMarker(entt::registry& registry);
+    static void CollisionCheck(entt::registry& registry);
 };

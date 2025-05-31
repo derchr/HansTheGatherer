@@ -22,25 +22,26 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(SDL3_ttf)
 
 FetchContent_Declare(
-    flecs
-    URL https://github.com/SanderMertens/flecs/archive/refs/tags/v4.0.5.tar.gz
+    entt
+    URL https://github.com/skypjack/entt/archive/refs/tags/v3.15.0.tar.gz
     OVERRIDE_FIND_PACKAGE
 )
-FetchContent_MakeAvailable(flecs)
+FetchContent_MakeAvailable(entt)
+find_package(entt CONFIG REQUIRED)
 
 find_package(SDL3 CONFIG REQUIRED)
 find_package(SDL3_ttf CONFIG REQUIRED)
-find_package(flecs CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 
 add_executable(HansTheGatherer
     src/main.cpp
     src/audio.cpp
     src/assets.cpp
+    src/level.cpp
     src/physics.cpp
     src/render.cpp
 )
 
-target_link_libraries(HansTheGatherer SDL3::SDL3 SDL3_ttf::SDL3_ttf flecs::flecs spdlog::spdlog)
+target_link_libraries(HansTheGatherer SDL3::SDL3 SDL3_ttf::SDL3_ttf EnTT spdlog::spdlog)
 
 set_property(TARGET HansTheGatherer PROPERTY CXX_STANDARD 20)

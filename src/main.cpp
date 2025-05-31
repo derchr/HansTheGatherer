@@ -7,8 +7,24 @@
 
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
-#include <flecs.h>
+#include <entt/entt.hpp>
 #include <spdlog/spdlog.h>
+
+void increment_ticks(entt::registry& registry)
+{
+    auto& game = registry.ctx().get<Game>();
+    // auto& translate_system = registry.ctx().get<TranslateSystem>();
+
+    game.ticks += 1;
+
+    if (game.ticks % 60 == 0)
+    {
+        game.time = std::max(0, game.time - 1);
+    }
+
+    // if (game.time == 0)
+    //     translate_system.translate_system.disable();
+}
 
 int main()
 {
@@ -38,42 +54,23 @@ int main()
 
     auto* text_engine = TTF_CreateRendererTextEngine(renderer);
 
-    flecs::world world;
+    entt::registry registry;
 
-    world.set<Game>(Game{.ticks = 0, .time = 60, .score = 0, .random_engine = {}});
-    world.set<ButtonInput>(ButtonInput{});
-    world.set<SdlHandles>(
+    registry.ctx().emplace<Game>(Game{.ticks = 0, .time = 60, .score = 0, .random_engine = {}});
+    registry.ctx().emplace<ButtonInput>(ButtonInput{});
+    auto sdl_handles = registry.ctx().emplace<SdlHandles>(
         SdlHandles{.window = window, .renderer = renderer, .text_engine = text_engine});
 
-    world.import <AssetModule>();
-    world.import <AudioModule>();
-    world.import <RenderModule>();
-    world.import <PhysicsModule>();
-    world.import <LevelModule>();
-
-    world.system<Game, TranslateSystem>("IncrementTicks")
-        .term_at(0)
-        .singleton()
-        .term_at(1)
-        .singleton()
-        .each(
-            [](Game& game, TranslateSystem& translate_system)
-            {
-                game.ticks += 1;
-
-                if (game.ticks % 60 == 0)
-                {
-                    game.time = std::max(0, game.time - 1);
-                }
-
-                if (game.time == 0)
-                    translate_system.translate_system.disable();
-            });
+    AssetModule asset_module(registry);
+    AudioModule audio_module(registry);
+    RenderModule render_module(registry);
+    PhysicsModule physics_module(registry);
+    LevelModule level_module(registry);
 
     bool exit_gameloop = false;
     while (!exit_gameloop)
     {
-        auto* input = world.get_mut<ButtonInput>();
+        auto* input = &registry.ctx().get<ButtonInput>();
 
         // Clear just pressed/released
         input->just_pressed.clear();
@@ -107,7 +104,24 @@ int main()
             }
         }
 
-        world.progress();
+        AudioModule::FeedAudioStreams(registry);
+        
+        increment_ticks(registry);
+        LevelModule::MoveBasket(registry);
+        LevelModule::SpawnFruits(registry);
+        LevelModule::CollectFruit(registry);
+        LevelModule::CollectSpider(registry);
+        // LevelModule::DespawnItems(registry);
+
+        PhysicsModule::TranslatePhysicsObject(registry);
+        PhysicsModule::PropagatePosition(registry);
+        PhysicsModule::RemoveCollisionMarker(registry);
+        PhysicsModule::CollisionCheck(registry);
+
+        SDL_RenderClear(sdl_handles.renderer);
+        RenderModule::RenderSprites(registry);
+        RenderModule::RenderScore(registry);
+        SDL_RenderPresent(sdl_handles.renderer);
     }
 
     SDL_DestroyRenderer(renderer);

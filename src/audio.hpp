@@ -2,7 +2,7 @@
 
 #include <SDL3/SDL.h>
 #include <cstdint>
-#include <flecs.h>
+#include <entt/entt.hpp>
 
 struct AudioAsset
 {
@@ -19,5 +19,6 @@ struct AudioStreams
 
 struct AudioModule
 {
-    AudioModule(flecs::world& world);
+    AudioModule(entt::registry& registry);
+    static void FeedAudioStreams(entt::registry& registry);
 };

@@ -4,7 +4,7 @@
 
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
-#include <flecs.h>
+#include <entt/entt.hpp>
 
 struct TextureAtlasLayout
 {
@@ -47,5 +47,5 @@ struct FontAssets
 
 struct AssetModule
 {
-    AssetModule(flecs::world& world);
+    AssetModule(entt::registry& registry);
 };

@@ -3,84 +3,68 @@
 
 #include <spdlog/spdlog.h>
 
-PhysicsModule::PhysicsModule(flecs::world& world)
+void PhysicsModule::TranslatePhysicsObject(entt::registry& registry)
 {
-    auto translate_system = world.system<Position, Velocity const>("TranslatePhysicsObject")
-                                .each(
-                                    [](Position& pos, Velocity const& vel)
-                                    {
-                                        pos.x += vel.x;
-                                        pos.y += vel.y;
-                                    });
+    auto view = registry.view<Position, Velocity const>();
 
-    world.set<TranslateSystem>(TranslateSystem{translate_system});
+    for (auto [entity, pos, vel] : view.each())
+    {
+        pos.x += vel.x;
+        pos.y += vel.y;
+    }
+}
 
-    // Introduce phase that runs after OnUpdate but before OnValidate
-    flecs::entity propagate_phase = world.entity().add(flecs::Phase).depends_on(flecs::OnUpdate);
+void PhysicsModule::PropagatePosition(entt::registry& registry)
+{
+    auto root_transform_view = registry.view<Position const, WorldPosition>(entt::exclude<Parent>);
+    auto transform_view = registry.view<Position const, WorldPosition, Parent const>();
 
-    world.system<WorldPosition, Position const>("PropagatePosition")
-        .kind(propagate_phase)
-        .each(
-            [](flecs::entity e, WorldPosition& world_pos, Position const& local_pos)
+    for (auto [entity, pos, world_pos] : root_transform_view.each())
+    {
+        world_pos.x = pos.x;
+        world_pos.y = pos.y;
+    }
+
+    for (auto [entity, pos, world_pos, parent] : transform_view.each())
+    {
+        auto parent_pos = registry.get<WorldPosition const>(parent.parent);
+
+        world_pos.x = parent_pos.x + pos.x;
+        world_pos.y = parent_pos.y + pos.y;
+    }
+}
+
+void PhysicsModule::RemoveCollisionMarker(entt::registry& registry)
+{
+    auto view = registry.view<Collided const>();
+    for (auto [entity] : view.each())
+    {
+        registry.remove<Collided>(entity);
+    }
+}
+void PhysicsModule::CollisionCheck(entt::registry& registry)
+{
+    auto view = registry.view<WorldPosition const, Size const, Parent const, CollisionBox>(
+        entt::exclude<BasketCollisionBox>);
+    auto basket_cb_view = registry.view<WorldPosition const, Size const, BasketCollisionBox>();
+
+    for (auto [e, world_pos, size, parent] : view.each())
+    {
+        auto fruit = parent.parent;
+
+        for (auto [basket, basket_world_pos, basket_size] : basket_cb_view.each())
+        {
+            if (basket_world_pos.x + basket_size.w >= world_pos.x &&
+                basket_world_pos.x <= world_pos.x + size.w &&
+                basket_world_pos.y + basket_size.h >= world_pos.y &&
+                basket_world_pos.y <= world_pos.y + size.h)
             {
-                if (e.parent() != flecs::entity::null() && e.parent().has<WorldPosition>())
-                    return;
+                registry.emplace<Collided>(fruit);
+            }
+        }
+    }
+}
 
-                world_pos.x = local_pos.x;
-                world_pos.y = local_pos.y;
-
-                std::function<void(flecs::entity, WorldPosition const&)> propagate_to_children;
-                propagate_to_children = [&](flecs::entity parent, WorldPosition const& parent_pos)
-                {
-                    parent.children(
-                        [=](flecs::entity child)
-                        {
-                            auto local_pos = child.get<Position>();
-                            auto world_pos = child.get_mut<WorldPosition>();
-
-                            world_pos->x = parent_pos.x + local_pos->x;
-                            world_pos->y = parent_pos.y + local_pos->y;
-
-                            propagate_to_children(child, *world_pos);
-                        });
-                };
-
-                propagate_to_children(e, world_pos);
-            });
-
-    auto basket_query = world.query<Basket>();
-
-    world.system<Collided>("RemoveCollisionMarker")
-        .kind(flecs::PreUpdate)
-        .each([](flecs::entity e, Collided) { e.remove<Collided>(); });
-
-    world.system<WorldPosition const, Size const, CollisionBox>("CollisionCheck")
-        .kind(flecs::OnValidate)
-        .each(
-            [basket_query](
-                flecs::entity e, WorldPosition const& world_pos, Size const& size, CollisionBox)
-            {
-                if (e.parent().has<Basket>())
-                    return;
-
-                auto fruit = e.parent();
-                auto basket = basket_query.first();
-                basket.children(
-                    [fruit, world_pos, size](flecs::entity basket_child)
-                    {
-                        if (!basket_child.has<CollisionBox>())
-                            return;
-
-                        auto basket_child_pos = basket_child.get<WorldPosition>();
-                        auto basket_child_size = basket_child.get<Size>();
-
-                        if (basket_child_pos->x + basket_child_size->w >= world_pos.x &&
-                            basket_child_pos->x <= world_pos.x + size.w &&
-                            basket_child_pos->y + basket_child_size->h >= world_pos.y &&
-                            basket_child_pos->y <= world_pos.y + size.h)
-                        {
-                            fruit.add<Collided>();
-                        }
-                    });
-            });
+PhysicsModule::PhysicsModule(entt::registry& registry)
+{
 }

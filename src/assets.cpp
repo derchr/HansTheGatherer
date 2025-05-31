@@ -81,9 +81,9 @@ FontAsset load_font(uint8_t const* data, size_t size)
     return font_asset;
 }
 
-AssetModule::AssetModule(flecs::world& world)
+AssetModule::AssetModule(entt::registry& registry)
 {
-    auto* renderer = world.get<SdlHandles>()->renderer;
+    auto renderer = registry.ctx().get<SdlHandles>().renderer;
 
     auto* background = load_texture(BACKGROUND_DATA, sizeof(BACKGROUND_DATA), renderer);
     TextureAtlasLayout background_layout = {.width = 866, .height = 510, .rows = 1, .columns = 1};
@@ -97,7 +97,7 @@ AssetModule::AssetModule(flecs::world& world)
     auto* basket = load_texture(BASKET_DATA, sizeof(BASKET_DATA), renderer);
     TextureAtlasLayout basket_layout = {.width = 16, .height = 16, .rows = 1, .columns = 1};
 
-    world.set<TextureAssets>(TextureAssets{
+    registry.ctx().emplace<TextureAssets>(TextureAssets{
         .background = Texture{.sdl_texture = background, .texture_atlas_layout = background_layout},
         .fruits = Texture{.sdl_texture = fruits, .texture_atlas_layout = fruits_layout},
         .spiders = Texture{.sdl_texture = spiders, .texture_atlas_layout = spiders_layout},
@@ -106,10 +106,10 @@ AssetModule::AssetModule(flecs::world& world)
     auto background_music = load_audio(BACKGROUND_MUSIC_DATA, sizeof(BACKGROUND_MUSIC_DATA));
     auto pickup_sound = load_audio(PICKUP_SOUND_DATA, sizeof(PICKUP_SOUND_DATA));
     auto hit_sound = load_audio(HIT_SOUND_DATA, sizeof(HIT_SOUND_DATA));
-    world.set<AudioAssets>(AudioAssets{.background_music = background_music,
-                                       .pickup_sound = pickup_sound,
-                                       .hit_sound = hit_sound});
+    registry.ctx().emplace<AudioAssets>(AudioAssets{.background_music = background_music,
+                                                    .pickup_sound = pickup_sound,
+                                                    .hit_sound = hit_sound});
 
     auto font = load_font(DEFAULT_FONT_DATA, sizeof(DEFAULT_FONT_DATA));
-    world.set<FontAssets>(FontAssets{.default_font = font});
+    registry.ctx().emplace<FontAssets>(FontAssets{.default_font = font});
 }
