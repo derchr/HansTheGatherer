@@ -14,23 +14,38 @@ PhysicsModule::PhysicsModule(flecs::world& world)
                 pos.y += vel.y;
             });
 
-    // world.system<WorldPosition, Position const>("PropagatePosition")
-    //     .kind(flecs::PostUpdate)
-    //     .each(
-    //         [](flecs::entity e, WorldPosition& world_pos, Position const& local_pos)
-    //         {
-    //             if (e.parent() == flecs::entity::null())
-    //             {
-    //                 world_pos.x = local_pos.x;
-    //                 world_pos.y = local_pos.y;
-    //             }
-    //             else
-    //             {
-    //                 auto parent_world_pos = e.parent().get<WorldPosition>();
-    //                 world_pos.x = parent_world_pos->x + local_pos.x;
-    //                 world_pos.y = parent_world_pos->y + local_pos.y;
-    //             }
-    //         });
+    // Introduce phase that runs after OnUpdate but before OnValidate
+    flecs::entity propagate_phase = world.entity().add(flecs::Phase).depends_on(flecs::OnUpdate);
+
+    world.system<WorldPosition, Position const>("PropagatePosition")
+        .kind(propagate_phase)
+        .each(
+            [](flecs::entity e, WorldPosition& world_pos, Position const& local_pos)
+            {
+                if (e.parent() != flecs::entity::null() && e.parent().has<WorldPosition>())
+                    return;
+
+                world_pos.x = local_pos.x;
+                world_pos.y = local_pos.y;
+
+                std::function<void(flecs::entity, WorldPosition const&)> propagate_to_children;
+                propagate_to_children = [&](flecs::entity parent, WorldPosition const& parent_pos)
+                {
+                    parent.children(
+                        [=](flecs::entity child)
+                        {
+                            auto local_pos = child.get<Position>();
+                            auto world_pos = child.get_mut<WorldPosition>();
+
+                            world_pos->x = parent_pos.x + local_pos->x;
+                            world_pos->y = parent_pos.y + local_pos->y;
+
+                            propagate_to_children(child, *world_pos);
+                        });
+                };
+
+                propagate_to_children(e, world_pos);
+            });
 
     world.system<SdlHandles const, WorldPosition const, Size const, CollisionBox>("DrawBoxes")
         .term_at(0)
