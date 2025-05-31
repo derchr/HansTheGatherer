@@ -31,4 +31,7 @@ struct AudioAssets
     AudioAsset background_music;
 };
 
-void init_assets(flecs::world& world);
+struct AssetModule
+{
+    AssetModule(flecs::world& world);
+};

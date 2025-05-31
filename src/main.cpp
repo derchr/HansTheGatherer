@@ -39,11 +39,12 @@ int main()
     }
 
     flecs::world world;
-    
+
     world.set<Game>(Game{.ticks = 0});
     world.set<ButtonInput>(ButtonInput{});
     world.set<SdlHandles>(SdlHandles{.window = window, .renderer = renderer});
-    init_assets(world);
+
+    world.import <AssetModule>();
     world.import <PhysicsModule>();
     world.import <LevelModule>();
 

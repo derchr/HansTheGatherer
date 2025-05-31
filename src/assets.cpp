@@ -53,7 +53,7 @@ AudioAsset load_audio(uint8_t const* data, size_t size)
     return audio_asset;
 }
 
-void init_assets(flecs::world& world)
+AssetModule::AssetModule(flecs::world& world)
 {
     auto* renderer = world.get<SdlHandles>()->renderer;
 
