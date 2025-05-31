@@ -6,19 +6,19 @@
 #include <spdlog/spdlog.h>
 
 static constexpr uint8_t BACKGROUND_DATA[] = {
-#embed "assets/images/jungle.bmp"
+#embed "../assets/images/jungle.bmp"
 };
 
 static constexpr uint8_t FRUITS_DATA[] = {
-#embed "assets/images/fruits.bmp"
+#embed "../assets/images/fruits.bmp"
 };
 
 static constexpr uint8_t BASKET_DATA[] = {
-#embed "assets/images/basket.bmp"
+#embed "../assets/images/basket.bmp"
 };
 
 static constexpr uint8_t BACKGROUND_MUSIC_DATA[] = {
-#embed "assets/sounds/JamaicanSunrise.wav"
+#embed "../assets/sounds/JamaicanSunrise.wav"
 };
 
 SDL_Texture *load_texture(uint8_t const *data, size_t size,

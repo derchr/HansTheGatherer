@@ -10,7 +10,10 @@ find_package(SDL3 CONFIG REQUIRED)
 find_package(flecs CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 
-add_executable(HansTheGatherer main.cpp assets.cpp)
+add_executable(HansTheGatherer
+    src/main.cpp
+    src/assets.cpp
+)
 
 target_link_libraries(HansTheGatherer SDL3::SDL3 flecs::flecs spdlog::spdlog)
 
