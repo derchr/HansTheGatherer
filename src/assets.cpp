@@ -1,6 +1,6 @@
 #include "assets.hpp"
 #include "audio.hpp"
-#include "sdl_types.hpp"
+#include "definitions.hpp"
 
 #include <cstdint>
 #include <spdlog/spdlog.h>

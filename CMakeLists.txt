@@ -13,6 +13,7 @@ find_package(spdlog CONFIG REQUIRED)
 add_executable(HansTheGatherer
     src/main.cpp
     src/assets.cpp
+    src/physics.cpp
 )
 
 target_link_libraries(HansTheGatherer SDL3::SDL3 flecs::flecs spdlog::spdlog)
