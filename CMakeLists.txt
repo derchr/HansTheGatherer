@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.24)
 
 project(HansTheGatherer)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Option to switch real platform vs. SDL implementation...
 
 find_package(SDL3 CONFIG REQUIRED)
