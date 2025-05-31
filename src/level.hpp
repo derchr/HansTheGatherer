@@ -38,8 +38,8 @@ struct LevelModule
         world.entity()
             .child_of(basket)
             .add<WorldPosition>()
-            .set<Position>(Position{.x = 0, .y = 0})
-            .set<Size>(Size{.w = 64, .h = 32})
+            .set<Position>(Position{.x = 0, .y = 16})
+            .set<Size>(Size{.w = 64, .h = 16})
             .add<CollisionBox>();
 
         world.system<Game const, TextureAssets const>("SpawnFruits")
@@ -87,10 +87,15 @@ struct LevelModule
         //                 e.destruct();
         //         });
 
-        world.system<Game, Fruit, Collided>("CollectItem")
+        world.system<Game, Position, Fruit, Collided>("CollectItem")
             .term_at(0)
             .singleton()
-            .each([](flecs::entity e, Game& game, Fruit, Collided) { game.score += 10; });
+            .each(
+                [](flecs::entity e, Game& game, Position& pos, Fruit, Collided)
+                {
+                    game.score += 10;
+                    pos.x = 1000;
+                });
 
         world.system<ButtonInput const, Position, Size const, Sprite const, Basket>("MoveBasket")
             .term_at(0)

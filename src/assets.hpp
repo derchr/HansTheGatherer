@@ -3,6 +3,7 @@
 #include "audio.hpp"
 
 #include <SDL3/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
 #include <flecs.h>
 
 struct TextureAtlasLayout
@@ -29,6 +30,16 @@ struct TextureAssets
 struct AudioAssets
 {
     AudioAsset background_music;
+};
+
+struct FontAsset
+{
+    TTF_Font* font;
+};
+
+struct FontAssets
+{
+    FontAsset default_font;
 };
 
 struct AssetModule

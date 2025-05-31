@@ -11,6 +11,7 @@
 #include <SDL3/SDL_iostream.h>
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_video.h>
+#include <SDL3_ttf/SDL_ttf.h>
 #include <flecs.h>
 #include <spdlog/spdlog.h>
 
@@ -26,6 +27,8 @@ int main()
         std::terminate();
     }
 
+    TTF_Init();
+
     auto* window = SDL_CreateWindow("HansTheGatherer", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
     if (window == nullptr)
     {
@@ -38,11 +41,14 @@ int main()
         spdlog::critical("Failed to create SDL renderer!\nCause: {}", SDL_GetError());
     }
 
+    auto* text_engine = TTF_CreateRendererTextEngine(renderer);
+
     flecs::world world;
 
-    world.set<Game>(Game{.ticks = 0});
+    world.set<Game>(Game{.ticks = 0, .time = 60, .score = 0});
     world.set<ButtonInput>(ButtonInput{});
-    world.set<SdlHandles>(SdlHandles{.window = window, .renderer = renderer});
+    world.set<SdlHandles>(
+        SdlHandles{.window = window, .renderer = renderer, .text_engine = text_engine});
 
     world.import <AssetModule>();
     world.import <PhysicsModule>();
@@ -51,10 +57,19 @@ int main()
     world.system<Game>("IncrementTicks")
         .term_at(0)
         .singleton()
-        .each([](Game& game_ticks) { game_ticks.ticks += 1; });
+        .each(
+            [](Game& game)
+            {
+                game.ticks += 1;
+
+                if (game.ticks % 60 == 0)
+                {
+                    game.time--;
+                }
+            });
 
     world.system<SdlHandles const, Position const, Size const, Sprite const>("RenderSprites")
-        .kind(flecs::PreUpdate)
+        .kind(flecs::OnStore)
         .term_at(0)
         .singleton()
         .each(
@@ -78,6 +93,27 @@ int main()
 
                 SDL_RenderTexture(
                     sdl_handles.renderer, sprite.texture->sdl_texture, &srcrect, &dstrect);
+            });
+
+    world.system<SdlHandles const, Game const, FontAssets const>("RenderScore")
+        .kind(flecs::OnStore)
+        .term_at(0)
+        .singleton()
+        .term_at(1)
+        .singleton()
+        .term_at(2)
+        .singleton()
+        .each(
+            [](SdlHandles const& sdl_handles, Game const& game, FontAssets const& font_assets)
+            {
+                auto score_string = std::format("Score: {}\nTime: {}", game.score, game.time);
+                auto text = TTF_CreateText(sdl_handles.text_engine,
+                                           font_assets.default_font.font,
+                                           score_string.c_str(),
+                                           score_string.length());
+                TTF_DrawRendererText(text, 0.0, 0.0);
+
+                TTF_DestroyText(text);
             });
 
     auto* audio_assets = world.get<AudioAssets>();

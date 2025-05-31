@@ -21,6 +21,10 @@ static constexpr uint8_t BACKGROUND_MUSIC_DATA[] = {
 #embed "../assets/sounds/JamaicanSunrise.wav"
 };
 
+static constexpr uint8_t DEFAULT_FONT_DATA[] = {
+#embed "../assets/fonts/OpenTTD-Sans.ttf"
+};
+
 SDL_Texture* load_texture(uint8_t const* data, size_t size, SDL_Renderer* renderer)
 {
     auto* iostream = SDL_IOFromConstMem(data, size);
@@ -53,6 +57,18 @@ AudioAsset load_audio(uint8_t const* data, size_t size)
     return audio_asset;
 }
 
+FontAsset load_font(uint8_t const* data, size_t size)
+{
+    FontAsset font_asset;
+
+    auto* iostream = SDL_IOFromConstMem(data, size);
+    auto* ttf = TTF_OpenFontIO(iostream, false, 20);
+
+    font_asset.font = ttf;
+
+    return font_asset;
+}
+
 AssetModule::AssetModule(flecs::world& world)
 {
     auto* renderer = world.get<SdlHandles>()->renderer;
@@ -73,4 +89,7 @@ AssetModule::AssetModule(flecs::world& world)
 
     auto background_music = load_audio(BACKGROUND_MUSIC_DATA, sizeof(BACKGROUND_MUSIC_DATA));
     world.set<AudioAssets>(AudioAssets{.background_music = background_music});
+
+    auto font = load_font(DEFAULT_FONT_DATA, sizeof(DEFAULT_FONT_DATA));
+    world.set<FontAssets>(FontAssets{.default_font = font});
 }

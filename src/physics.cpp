@@ -48,6 +48,10 @@ PhysicsModule::PhysicsModule(flecs::world& world)
 
     auto basket_query = world.query<Basket>();
 
+    world.system<Collided>("RemoveCollisionMarker")
+        .kind(flecs::PreUpdate)
+        .each([](flecs::entity e, Collided) { e.remove<Collided>(); });
+
     world.system<WorldPosition const, Size const, CollisionBox>("CollisionCheck")
         .kind(flecs::OnValidate)
         .each(
