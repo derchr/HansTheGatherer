@@ -5,13 +5,15 @@
 
 PhysicsModule::PhysicsModule(flecs::world& world)
 {
-    world.system<Position, Velocity const>("TranslatePhysicsObject")
-        .each(
-            [](Position& pos, Velocity const& vel)
-            {
-                pos.x += vel.x;
-                pos.y += vel.y;
-            });
+    auto translate_system = world.system<Position, Velocity const>("TranslatePhysicsObject")
+                                .each(
+                                    [](Position& pos, Velocity const& vel)
+                                    {
+                                        pos.x += vel.x;
+                                        pos.y += vel.y;
+                                    });
+
+    world.set<TranslateSystem>(TranslateSystem{translate_system});
 
     // Introduce phase that runs after OnUpdate but before OnValidate
     flecs::entity propagate_phase = world.entity().add(flecs::Phase).depends_on(flecs::OnUpdate);

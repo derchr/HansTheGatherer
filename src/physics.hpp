@@ -34,6 +34,11 @@ struct Collided
 {
 };
 
+struct TranslateSystem
+{
+    flecs::system translate_system;
+};
+
 struct PhysicsModule
 {
     PhysicsModule(flecs::world& world);

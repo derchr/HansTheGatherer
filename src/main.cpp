@@ -51,18 +51,23 @@ int main()
     world.import <PhysicsModule>();
     world.import <LevelModule>();
 
-    world.system<Game>("IncrementTicks")
+    world.system<Game, TranslateSystem>("IncrementTicks")
         .term_at(0)
         .singleton()
+        .term_at(1)
+        .singleton()
         .each(
-            [](Game& game)
+            [](Game& game, TranslateSystem& translate_system)
             {
                 game.ticks += 1;
 
                 if (game.ticks % 60 == 0)
                 {
-                    game.time--;
+                    game.time = std::max(0, game.time - 1);
                 }
+
+                if (game.time == 0)
+                    translate_system.translate_system.disable();
             });
 
     bool exit_gameloop = false;
