@@ -54,50 +54,53 @@ struct LevelModule
             .set<Size>(Size{.w = 64, .h = 16})
             .add<CollisionBox>();
 
-        world.system<Game const, TextureAssets const>("SpawnFruits")
+        world.system<Game, TextureAssets const>("SpawnFruits")
             .term_at(0)
             .singleton()
             .term_at(1)
             .singleton()
             .each(
-                [](flecs::iter& it,
-                   size_t index,
-                   Game const& game,
-                   TextureAssets const& texture_assets)
+                [](flecs::iter& it, size_t index, Game& game, TextureAssets const& texture_assets)
                 {
-                    bool spider = std::rand() % 3 == 0;
-                    int vel = std::rand() % 3 + 1;
+                    std::bernoulli_distribution spider_dist(0.25);
+                    bool spider = spider_dist(game.random_engine);
+
+                    std::binomial_distribution<> velocity_dist(3, 0.5);
+                    int vel = velocity_dist(game.random_engine) + 1;
 
                     if ((game.ticks % 50) == 0)
                     {
                         flecs::entity e;
+                        std::uniform_int_distribution<> xpos_dist(32, WINDOW_WIDTH - 32);
+                        int xpos = xpos_dist(game.random_engine);
                         if (!spider)
                         {
+                            std::uniform_int_distribution<> index_dist(0, 228 - 1);
+                            uint16_t index = index_dist(game.random_engine);
+
                             e = it.world()
                                     .entity()
                                     .add<Fruit>()
                                     .add<WorldPosition>()
-                                    .set<Position>(
-                                        Position{.x = std::rand() % WINDOW_WIDTH, .y = -16})
+                                    .set<Position>(Position{.x = xpos, .y = -16})
                                     .set<Velocity>(Velocity{.x = 0, .y = vel})
-                                    .set<Sprite>(
-                                        Sprite{.texture = &texture_assets.fruits,
-                                               .texture_atlas_index =
-                                                   static_cast<uint16_t>(std::rand() % 228)})
+                                    .set<Sprite>(Sprite{.texture = &texture_assets.fruits,
+                                                        .texture_atlas_index = index})
                                     .set<Size>(Size{.w = 32, .h = 32});
                         }
                         else
                         {
+                            std::uniform_int_distribution<> index_dist(0, 8 - 1);
+                            uint16_t index = index_dist(game.random_engine);
+
                             e = it.world()
                                     .entity()
                                     .add<Spider>()
                                     .add<WorldPosition>()
-                                    .set<Position>(
-                                        Position{.x = std::rand() % WINDOW_WIDTH, .y = -16})
+                                    .set<Position>(Position{.x = xpos, .y = -16})
                                     .set<Velocity>(Velocity{.x = 0, .y = vel})
                                     .set<Sprite>(Sprite{.texture = &texture_assets.spiders,
-                                                        .texture_atlas_index =
-                                                            static_cast<uint16_t>(std::rand() % 8)})
+                                                        .texture_atlas_index = index})
                                     .set<Size>(Size{.w = 32, .h = 32});
                         }
                         it.world()

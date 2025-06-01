@@ -45,7 +45,7 @@ int main()
 
     flecs::world world;
 
-    world.set<Game>(Game{.ticks = 0, .time = 60, .score = 0});
+    world.set<Game>(Game{.ticks = 0, .time = 60, .score = 0, .random_engine = {}});
     world.set<ButtonInput>(ButtonInput{});
     world.set<SdlHandles>(
         SdlHandles{.window = window, .renderer = renderer, .text_engine = text_engine});

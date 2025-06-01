@@ -2,6 +2,7 @@
 
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
+#include <random>
 
 static constexpr int WINDOW_WIDTH = 400;
 static constexpr int WINDOW_HEIGHT = 240;
@@ -18,4 +19,5 @@ struct Game
     uint32_t ticks;
     int32_t time;
     int32_t score;
+    std::default_random_engine random_engine;
 };
