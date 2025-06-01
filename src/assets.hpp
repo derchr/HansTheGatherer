@@ -31,6 +31,8 @@ struct TextureAssets
 struct AudioAssets
 {
     AudioAsset background_music;
+    AudioAsset pickup_sound;
+    AudioAsset hit_sound;
 };
 
 struct FontAsset

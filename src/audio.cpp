@@ -7,9 +7,10 @@ AudioModule::AudioModule(flecs::world& world)
     auto* music_stream = SDL_OpenAudioDeviceStream(
         SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &audio_assets->background_music.spec, NULL, NULL);
     auto* sound_stream = SDL_OpenAudioDeviceStream(
-        SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &audio_assets->background_music.spec, NULL, NULL);
+        SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &audio_assets->pickup_sound.spec, NULL, NULL);
 
     SDL_ResumeAudioStreamDevice(music_stream);
+    SDL_ResumeAudioStreamDevice(sound_stream);
 
     world.set<AudioStreams>(
         AudioStreams{.music_stream = music_stream, .sound_stream = sound_stream});

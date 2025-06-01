@@ -25,6 +25,14 @@ static constexpr uint8_t BACKGROUND_MUSIC_DATA[] = {
 #embed "../assets/sounds/JamaicanSunrise.wav"
 };
 
+static constexpr uint8_t PICKUP_SOUND_DATA[] = {
+#embed "../assets/sounds/pickup.wav"
+};
+
+static constexpr uint8_t HIT_SOUND_DATA[] = {
+#embed "../assets/sounds/hit.wav"
+};
+
 static constexpr uint8_t DEFAULT_FONT_DATA[] = {
 #embed "../assets/fonts/OpenTTD-Sans.ttf"
 };
@@ -96,7 +104,11 @@ AssetModule::AssetModule(flecs::world& world)
         .basket = Texture{.sdl_texture = basket, .texture_atlas_layout = basket_layout}});
 
     auto background_music = load_audio(BACKGROUND_MUSIC_DATA, sizeof(BACKGROUND_MUSIC_DATA));
-    world.set<AudioAssets>(AudioAssets{.background_music = background_music});
+    auto pickup_sound = load_audio(PICKUP_SOUND_DATA, sizeof(PICKUP_SOUND_DATA));
+    auto hit_sound = load_audio(HIT_SOUND_DATA, sizeof(HIT_SOUND_DATA));
+    world.set<AudioAssets>(AudioAssets{.background_music = background_music,
+                                       .pickup_sound = pickup_sound,
+                                       .hit_sound = hit_sound});
 
     auto font = load_font(DEFAULT_FONT_DATA, sizeof(DEFAULT_FONT_DATA));
     world.set<FontAssets>(FontAssets{.default_font = font});

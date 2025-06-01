@@ -122,26 +122,54 @@ struct LevelModule
         //                 e.destruct();
         //         });
 
-        world.system<Game, Position, Fruit, Collided>("CollectFruit")
+        world.system<Game, AudioStreams, AudioAssets, Position, Fruit, Collided>("CollectFruit")
             .term_at(0)
             .singleton()
+            .term_at(1)
+            .singleton()
+            .term_at(2)
+            .singleton()
             .each(
-                [](flecs::entity e, Game& game, Position& pos, Fruit, Collided)
+                [](flecs::entity e,
+                   Game& game,
+                   AudioStreams& audio_streams,
+                   AudioAssets& audio_assets,
+                   Position& pos,
+                   Fruit,
+                   Collided)
                 {
                     game.score += 10;
                     pos.x += 1000;
                     // e.destruct();
+
+                    SDL_PutAudioStreamData(audio_streams.sound_stream,
+                                           audio_assets.pickup_sound.buffer,
+                                           audio_assets.pickup_sound.buffer_length);
                 });
 
-        world.system<Game, Position, Spider, Collided>("CollectSpider")
+        world.system<Game, AudioStreams, AudioAssets, Position, Spider, Collided>("CollectSpider")
             .term_at(0)
             .singleton()
+            .term_at(1)
+            .singleton()
+            .term_at(2)
+            .singleton()
             .each(
-                [](flecs::entity e, Game& game, Position& pos, Spider, Collided)
+                [](flecs::entity e,
+                   Game& game,
+                   AudioStreams& audio_streams,
+                   AudioAssets& audio_assets,
+                   Position& pos,
+                   Spider,
+                   Collided)
                 {
                     game.score -= 50;
                     pos.x += 1000;
                     // e.destruct();
+
+                    SDL_PutAudioStreamData(audio_streams.sound_stream,
+                                           audio_assets.hit_sound.buffer,
+                                           audio_assets.hit_sound.buffer_length);
                 });
 
         world.system<ButtonInput const, Position, Size const, Sprite const, Basket>("MoveBasket")
