@@ -51,6 +51,7 @@ int main()
         SdlHandles{.window = window, .renderer = renderer, .text_engine = text_engine});
 
     world.import <AssetModule>();
+    world.import <AudioModule>();
     world.import <PhysicsModule>();
     world.import <LevelModule>();
 
@@ -116,17 +117,6 @@ int main()
                 TTF_DestroyText(text);
             });
 
-    auto* audio_assets = world.get<AudioAssets>();
-    auto* stream = SDL_OpenAudioDeviceStream(
-        SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &audio_assets->background_music.spec, NULL, NULL);
-    if (!stream)
-    {
-        SDL_Log("Couldn't create audio stream: %s", SDL_GetError());
-        return SDL_APP_FAILURE;
-    }
-
-    SDL_ResumeAudioStreamDevice(stream);
-
     bool exit_gameloop = false;
     while (!exit_gameloop)
     {
@@ -162,14 +152,6 @@ int main()
                 }
                 break;
             }
-        }
-
-        // Game Logic
-        if (SDL_GetAudioStreamQueued(stream) < (int)audio_assets->background_music.buffer_length)
-        {
-            SDL_PutAudioStreamData(stream,
-                                   audio_assets->background_music.buffer,
-                                   audio_assets->background_music.buffer_length);
         }
 
         // Render

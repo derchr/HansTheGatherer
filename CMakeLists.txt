@@ -35,6 +35,7 @@ find_package(spdlog CONFIG REQUIRED)
 
 add_executable(HansTheGatherer
     src/main.cpp
+    src/audio.cpp
     src/assets.cpp
     src/physics.cpp
 )
