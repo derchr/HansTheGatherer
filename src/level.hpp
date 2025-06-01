@@ -16,6 +16,10 @@ struct Spider
 {
 };
 
+struct Item
+{
+};
+
 struct Basket
 {
 };
@@ -25,6 +29,10 @@ struct LevelModule
     LevelModule(flecs::world& world)
     {
         auto const* texture_assets = world.get<TextureAssets>();
+
+        world.component<Item>();
+        world.component<Fruit>().is_a<Item>();
+        world.component<Spider>().is_a<Item>();
 
         world.entity("Background")
             .set<Position>(Position{.x = 0, .y = 0})
@@ -102,10 +110,10 @@ struct LevelModule
                     }
                 });
 
-        // world.system<WorldPosition const, Fruit>("DespawnFruits")
+        // world.system<WorldPosition const, Item>("DespawnItems")
         //     .kind(flecs::OnValidate)
         //     .each(
-        //         [](flecs::entity e, WorldPosition const& pos, Fruit)
+        //         [](flecs::entity e, WorldPosition const& pos, Item)
         //         {
         //             if (pos.y >= WINDOW_HEIGHT)
         //                 e.destruct();
@@ -118,7 +126,8 @@ struct LevelModule
                 [](flecs::entity e, Game& game, Position& pos, Fruit, Collided)
                 {
                     game.score += 10;
-                    pos.x = 1000;
+                    pos.x += 1000;
+                    // e.destruct();
                 });
 
         world.system<Game, Position, Spider, Collided>("CollectSpider")
@@ -128,7 +137,8 @@ struct LevelModule
                 [](flecs::entity e, Game& game, Position& pos, Spider, Collided)
                 {
                     game.score -= 50;
-                    pos.x = 1000;
+                    pos.x += 1000;
+                    // e.destruct();
                 });
 
         world.system<ButtonInput const, Position, Size const, Sprite const, Basket>("MoveBasket")
