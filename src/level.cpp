@@ -8,14 +8,14 @@ void LevelModule::MoveBasket(entt::registry& registry)
 
     for (auto [entity, pos, size, sprite] : basket_view.each())
     {
-        if (input.pressed.contains(SDLK_LEFT))
-        {
-            pos.x -= 5;
-        }
-        if (input.pressed.contains(SDLK_RIGHT))
-        {
-            pos.x += 5;
-        }
+        // if (input.pressed.contains(SDLK_LEFT))
+        // {
+        //     pos.x -= 5;
+        // }
+        // if (input.pressed.contains(SDLK_RIGHT))
+        // {
+        //     pos.x += 5;
+        // }
 
         pos.x = pos.x < 0 ? 0 : pos.x;
         pos.x = pos.x > WINDOW_WIDTH - size.w ? WINDOW_WIDTH - size.w : pos.x;
@@ -77,7 +77,7 @@ void LevelModule::SpawnFruits(entt::registry& registry)
 void LevelModule::CollectFruit(entt::registry& registry)
 {
     auto& game = registry.ctx().get<Game>();
-    auto const& audio_streams = registry.ctx().get<AudioStreams>();
+    // auto const& audio_streams = registry.ctx().get<AudioStreams>();
     auto const& audio_assets = registry.ctx().get<AudioAssets>();
 
     auto view = registry.view<Position, Fruit, Collided>();
@@ -87,16 +87,16 @@ void LevelModule::CollectFruit(entt::registry& registry)
         pos.x += 1000;
         // registry.destroy(entity);
 
-        SDL_PutAudioStreamData(audio_streams.sound_stream,
-                               audio_assets.pickup_sound.buffer,
-                               audio_assets.pickup_sound.buffer_length);
+        // SDL_PutAudioStreamData(audio_streams.sound_stream,
+        //                        audio_assets.pickup_sound.buffer,
+        //                        audio_assets.pickup_sound.buffer_length);
     }
 }
 
 void LevelModule::CollectSpider(entt::registry& registry)
 {
     auto& game = registry.ctx().get<Game>();
-    auto const& audio_streams = registry.ctx().get<AudioStreams>();
+    // auto const& audio_streams = registry.ctx().get<AudioStreams>();
     auto const& audio_assets = registry.ctx().get<AudioAssets>();
 
     auto view = registry.view<Position, Spider, Collided>();
@@ -106,9 +106,9 @@ void LevelModule::CollectSpider(entt::registry& registry)
         pos.x += 1000;
         // registry.destroy(entity);
 
-        SDL_PutAudioStreamData(audio_streams.sound_stream,
-                               audio_assets.hit_sound.buffer,
-                               audio_assets.hit_sound.buffer_length);
+        // SDL_PutAudioStreamData(audio_streams.sound_stream,
+        //                        audio_assets.hit_sound.buffer,
+        //                        audio_assets.hit_sound.buffer_length);
     };
 }
 

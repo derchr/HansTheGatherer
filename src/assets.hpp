@@ -2,8 +2,6 @@
 
 #include "audio.hpp"
 
-#include <SDL3/SDL.h>
-#include <SDL3_ttf/SDL_ttf.h>
 #include <entt/entt.hpp>
 
 struct TextureAtlasLayout
@@ -16,7 +14,7 @@ struct TextureAtlasLayout
 
 struct Texture
 {
-    SDL_Texture* sdl_texture;
+    // SDL_Texture* sdl_texture;
     TextureAtlasLayout texture_atlas_layout;
 };
 
@@ -35,15 +33,15 @@ struct AudioAssets
     AudioAsset hit_sound;
 };
 
-struct FontAsset
-{
-    TTF_Font* font;
-};
+// struct FontAsset
+// {
+//     TTF_Font* font;
+// };
 
-struct FontAssets
-{
-    FontAsset default_font;
-};
+// struct FontAssets
+// {
+//     FontAsset default_font;
+// };
 
 struct AssetModule
 {

@@ -2,7 +2,6 @@
 
 #include "assets.hpp"
 
-#include <SDL3/SDL.h>
 #include <cstdint>
 
 struct Sprite
