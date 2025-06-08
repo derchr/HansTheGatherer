@@ -1,8 +1,6 @@
 #include "physics.hpp"
 #include "level.hpp"
 
-#include <spdlog/spdlog.h>
-
 void PhysicsModule::TranslatePhysicsObject(entt::registry& registry)
 {
     auto view = registry.view<Position, Velocity const>();

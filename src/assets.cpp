@@ -3,7 +3,6 @@
 #include "definitions.hpp"
 
 #include <cstdint>
-#include <spdlog/spdlog.h>
 
 static constexpr uint8_t BACKGROUND_DATA[] = {
 #embed "../assets/images/jungle.bmp"
@@ -43,13 +42,13 @@ SDL_Texture* load_texture(uint8_t const* data, size_t size, SDL_Renderer* render
     SDL_Surface* surface = SDL_LoadBMP_IO(iostream, false);
     if (surface == nullptr)
     {
-        spdlog::error("Failed to load SDL surface!\nCause: {}", SDL_GetError());
+        // spdlog::error("Failed to load SDL surface!\nCause: {}", SDL_GetError());
     }
 
     SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
     if (texture == nullptr)
     {
-        spdlog::error("Failed to create texture from surface!\nCause: {}", SDL_GetError());
+        // spdlog::error("Failed to create texture from surface!\nCause: {}", SDL_GetError());
     }
 
     return texture;
@@ -64,7 +63,7 @@ AudioAsset load_audio(uint8_t const* data, size_t size)
         iostream, false, &audio_asset.spec, &audio_asset.buffer, &audio_asset.buffer_length);
     if (!res)
     {
-        spdlog::error("Failed to load audio file!\nCause: {}", SDL_GetError());
+        // spdlog::error("Failed to load audio file!\nCause: {}", SDL_GetError());
     }
     return audio_asset;
 }

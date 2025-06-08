@@ -5,7 +5,6 @@
 #include "sprite.hpp"
 
 #include <entt/entt.hpp>
-#include <spdlog/spdlog.h>
 
 struct Background
 {

@@ -31,7 +31,6 @@ find_package(entt CONFIG REQUIRED)
 
 find_package(SDL3 CONFIG REQUIRED)
 find_package(SDL3_ttf CONFIG REQUIRED)
-find_package(spdlog CONFIG REQUIRED)
 
 add_executable(HansTheGatherer
     src/main.cpp
@@ -42,6 +41,6 @@ add_executable(HansTheGatherer
     src/render.cpp
 )
 
-target_link_libraries(HansTheGatherer SDL3::SDL3 SDL3_ttf::SDL3_ttf EnTT spdlog::spdlog)
+target_link_libraries(HansTheGatherer SDL3::SDL3 SDL3_ttf::SDL3_ttf EnTT)
 
 set_property(TARGET HansTheGatherer PROPERTY CXX_STANDARD 20)

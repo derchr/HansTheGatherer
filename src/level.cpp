@@ -1,8 +1,6 @@
 #include "level.hpp"
 #include "input.hpp"
 
-#include <spdlog/spdlog.h>
-
 void LevelModule::MoveBasket(entt::registry& registry)
 {
     auto const& input = registry.ctx().get<ButtonInput>();

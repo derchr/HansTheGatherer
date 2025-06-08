@@ -8,7 +8,6 @@
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include <entt/entt.hpp>
-#include <spdlog/spdlog.h>
 
 void increment_ticks(entt::registry& registry)
 {
@@ -28,13 +27,13 @@ void increment_ticks(entt::registry& registry)
 
 int main()
 {
-    spdlog::info("Initialize SDL...");
+    // spdlog::info("Initialize SDL...");
 
     SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
 
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO))
     {
-        spdlog::critical("Failed to initialize SDL!\nCause: {}", SDL_GetError());
+        // spdlog::critical("Failed to initialize SDL!\nCause: {}", SDL_GetError());
         std::terminate();
     }
 
@@ -43,13 +42,13 @@ int main()
     auto* window = SDL_CreateWindow("HansTheGatherer", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
     if (window == nullptr)
     {
-        spdlog::critical("Failed to create SDL window!\nCause: {}", SDL_GetError());
+        // spdlog::critical("Failed to create SDL window!\nCause: {}", SDL_GetError());
     }
 
     auto* renderer = SDL_CreateRenderer(window, nullptr);
     if (renderer == nullptr)
     {
-        spdlog::critical("Failed to create SDL renderer!\nCause: {}", SDL_GetError());
+        // spdlog::critical("Failed to create SDL renderer!\nCause: {}", SDL_GetError());
     }
 
     auto* text_engine = TTF_CreateRendererTextEngine(renderer);
@@ -105,13 +104,16 @@ int main()
         }
 
         AudioModule::FeedAudioStreams(registry);
-        
-        increment_ticks(registry);
-        LevelModule::MoveBasket(registry);
-        LevelModule::SpawnFruits(registry);
-        LevelModule::CollectFruit(registry);
-        LevelModule::CollectSpider(registry);
-        // LevelModule::DespawnItems(registry);
+
+        if (registry.ctx().get<Game>().time != 0)
+        {
+            increment_ticks(registry);
+            LevelModule::MoveBasket(registry);
+            LevelModule::SpawnFruits(registry);
+            LevelModule::CollectFruit(registry);
+            LevelModule::CollectSpider(registry);
+            // LevelModule::DespawnItems(registry);
+        }
 
         PhysicsModule::TranslatePhysicsObject(registry);
         PhysicsModule::PropagatePosition(registry);
