@@ -14,7 +14,7 @@ struct TextureAtlasLayout
 
 struct Texture
 {
-    uint8_t* data;
+    uint8_t const* data;
     uint32_t data_length;
     TextureAtlasLayout texture_atlas_layout;
 };

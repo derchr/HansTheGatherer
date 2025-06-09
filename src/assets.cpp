@@ -81,31 +81,25 @@ static constexpr uint8_t DEFAULT_FONT_DATA[] = {
 
 AssetModule::AssetModule(entt::registry& registry)
 {
-    // auto renderer = registry.ctx().get<SdlHandles>().renderer;
-
-    // auto* background = load_texture(BACKGROUND_DATA, sizeof(BACKGROUND_DATA), renderer);
-    TextureAtlasLayout background_layout = {.width = 400, .height = 240, .rows = 1, .columns = 1};
-
-    // auto* fruits = load_texture(FRUITS_DATA, sizeof(FRUITS_DATA), renderer);
-    TextureAtlasLayout fruits_layout = {.width = 32, .height = 32, .rows = 6, .columns = 38};
-
-    // auto* spiders = load_texture(SPIDERS_DATA, sizeof(SPIDERS_DATA), renderer);
-    TextureAtlasLayout spiders_layout = {.width = 32, .height = 32, .rows = 2, .columns = 4};
-
-    // auto* basket = load_texture(BASKET_DATA, sizeof(BASKET_DATA), renderer);
-    TextureAtlasLayout basket_layout = {.width = 64, .height = 32, .rows = 1, .columns = 1};
-
-    // registry.ctx().emplace<TextureAssets>(TextureAssets{
-    //     .background = Texture{.sdl_texture = background, .texture_atlas_layout =
-    //     background_layout}, .fruits = Texture{.sdl_texture = fruits, .texture_atlas_layout =
-    //     fruits_layout}, .spiders = Texture{.sdl_texture = spiders, .texture_atlas_layout =
-    //     spiders_layout}, .basket = Texture{.sdl_texture = basket, .texture_atlas_layout =
-    //     basket_layout}});
-    registry.ctx().emplace<TextureAssets>(
-        TextureAssets{.background = Texture{.texture_atlas_layout = background_layout},
-                      .fruits = Texture{.texture_atlas_layout = fruits_layout},
-                      .spiders = Texture{.texture_atlas_layout = spiders_layout},
-                      .basket = Texture{.texture_atlas_layout = basket_layout}});
+    TextureAtlasLayout background_layout{.width = 400, .height = 240, .rows = 1, .columns = 1};
+    TextureAtlasLayout fruits_layout{.width = 32, .height = 32, .rows = 6, .columns = 38};
+    TextureAtlasLayout spiders_layout{.width = 32, .height = 32, .rows = 2, .columns = 4};
+    TextureAtlasLayout basket_layout{.width = 64, .height = 32, .rows = 1, .columns = 1};
+    Texture background{.data = BACKGROUND_DATA,
+                       .data_length = sizeof(BACKGROUND_DATA),
+                       .texture_atlas_layout = background_layout};
+    Texture fruits{.data = FRUITS_DATA,
+                   .data_length = sizeof(FRUITS_DATA),
+                   .texture_atlas_layout = fruits_layout};
+    Texture spiders{.data = SPIDERS_DATA,
+                    .data_length = sizeof(SPIDERS_DATA),
+                    .texture_atlas_layout = spiders_layout};
+    Texture basket{.data = BASKET_DATA,
+                   .data_length = sizeof(BASKET_DATA),
+                   .texture_atlas_layout = basket_layout};
+                   
+    registry.ctx().emplace<TextureAssets>(TextureAssets{
+        .background = background, .fruits = fruits, .spiders = spiders, .basket = basket});
 
     // auto background_music = load_audio(BACKGROUND_MUSIC_DATA, sizeof(BACKGROUND_MUSIC_DATA));
     // auto pickup_sound = load_audio(PICKUP_SOUND_DATA, sizeof(PICKUP_SOUND_DATA));

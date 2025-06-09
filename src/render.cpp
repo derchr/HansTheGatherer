@@ -20,13 +20,16 @@ void RenderModule::RenderSprites(entt::registry& registry)
         registry.view<Position const, Size const, Sprite const>(entt::exclude<Background>);
     auto background_view = registry.view<Position const, Size const, Sprite const, Background>();
 
-    auto render_sprite = [](entt::entity entity, Position const& pos, Size const& size, Sprite const&sprite){
+    auto render_sprite =
+        [](entt::entity entity, Position const& pos, Size const& size, Sprite const& sprite)
+    {
         TextureAtlasLayout layout = sprite.texture->texture_atlas_layout;
         uint8_t row = sprite.texture_atlas_index / layout.columns;
         uint8_t column = sprite.texture_atlas_index % layout.columns;
         // Problemchen: Wir können die Sprites nicht strecken... hat keiner Interpolation
         // implementiert?
-        Hall::Draw(reinterpret_cast<unsigned short*>(sprite.texture->data), // Das ist 100% UB
+        Hall::Draw(reinterpret_cast<unsigned short*>(
+                       const_cast<uint8_t*>(sprite.texture->data)), // Das ist 100% UB
                    column * layout.width,
                    row * layout.height,
                    pos.x,
