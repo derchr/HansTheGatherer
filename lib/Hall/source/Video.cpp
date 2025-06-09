@@ -1,7 +1,7 @@
 #include <Hall/Video.h>
 
 volatile char* GPU_START					= (char*)0x02000000;
-volatile unsigned short** GPU_IMAGE_START	= (volatile unsigned short**)(GPU_START + 0);
+volatile unsigned short const** GPU_IMAGE_START	= (volatile unsigned short const**)(GPU_START + 0);
 volatile unsigned short* GPU_IMAGE_X_OFFSET	= (volatile unsigned short*)(GPU_START + 4);
 volatile unsigned short* GPU_IMAGE_Y_OFFSET	= (volatile unsigned short*)(GPU_START + 8);
 volatile unsigned short* GPU_IMAGE_WIDTH	= (volatile unsigned short*)(GPU_START + 12);
@@ -19,7 +19,7 @@ volatile bool* GPU_COMMAND_SWAP_BUFFERS		= (volatile bool*)(GPU_START + 56);
 volatile bool* VSYNC_BUFFER_SWAP			= (volatile bool*)(GPU_START + 60);
 
 
-void Hall::Draw(unsigned short* data, unsigned short xOffset, unsigned short yOffset, unsigned short screenX, unsigned short screenY, unsigned short width, unsigned short height, unsigned short dataWidth)
+void Hall::Draw(const unsigned short* data, unsigned short xOffset, unsigned short yOffset, unsigned short screenX, unsigned short screenY, unsigned short width, unsigned short height, unsigned short dataWidth)
 {
 	*GPU_IMAGE_START = data;
 	*GPU_IMAGE_X_OFFSET = xOffset;
@@ -39,7 +39,7 @@ void Hall::Clear(unsigned short color)
 	*GPU_COMMAND_CLEAR = true;
 }
 
-void Hall::SetData(unsigned short* data)
+void Hall::SetData(const unsigned short* data)
 {
 	*GPU_IMAGE_START = data;
 }
