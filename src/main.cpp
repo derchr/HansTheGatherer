@@ -69,8 +69,6 @@ int main()
         //     }
         // }
 
-        // AudioModule::FeedAudioStreams(registry);
-
         if (registry.ctx().get<Game>().time != 0)
         {
             increment_ticks(registry);

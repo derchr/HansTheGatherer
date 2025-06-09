@@ -59,8 +59,8 @@ AssetModule::AssetModule(entt::registry& registry)
                             .buffer_length = sizeof(PICKUP_SOUND_DATA)};
     AudioAsset hit_sound{.buffer = HIT_SOUND_DATA, .buffer_length = sizeof(HIT_SOUND_DATA)};
     registry.ctx().emplace<AudioAssets>(AudioAssets{.background_music = background_music,
-                                                    .pickup_sound =.buffer = pickup_sound,
-                                                    .hit_sound =.buffer = hit_sound});
+                                                    .pickup_sound = pickup_sound,
+                                                    .hit_sound = hit_sound});
 
     // auto font = load_font(DEFAULT_FONT_DATA, sizeof(DEFAULT_FONT_DATA));
     // registry.ctx().emplace<FontAssets>(FontAssets{.default_font = font});

@@ -1,9 +1,20 @@
 #include "level.hpp"
 #include "input.hpp"
 
+#include <Hall/Hall.h>
+
 LevelModule::LevelModule(entt::registry& registry)
 {
     auto const* texture_assets = &registry.ctx().get<TextureAssets>();
+    auto const* audio_steams = &registry.ctx().get<AudioStreams>();
+    auto const* audio_assets = &registry.ctx().get<AudioAssets>();
+
+    // Hall::SetupStereo(audio_steams->music_stream.id_left,
+    //                   audio_steams->music_stream.id_right,
+    //                   audio_assets->background_music.buffer,
+    //                   audio_assets->background_music.buffer_length / (2 * 2),
+    //                   0,
+    //                   audio_assets->background_music.buffer_length / (2 * 2));
 
     auto background = registry.create();
     registry.emplace<Position>(background, Position{.x = 0, .y = 0});
