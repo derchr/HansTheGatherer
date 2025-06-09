@@ -35,39 +35,17 @@ int main()
     bool exit_gameloop = false;
     while (!exit_gameloop)
     {
-        auto* input = &registry.ctx().get<ButtonInput>();
-
-        // Clear just pressed/released
-        input->just_pressed.clear();
-        input->just_released.clear();
-
         // Input
-        // SDL_Event event;
-        // while (SDL_PollEvent(&event))
-        // {
-        //     switch (event.type)
-        //     {
-        //     case SDL_EVENT_QUIT:
-        //         exit_gameloop = true;
-        //         break;
-        //     case SDL_EVENT_KEY_DOWN:
-        //         if (event.key.key == SDLK_ESCAPE)
-        //         {
-        //             exit_gameloop = true;
-        //         }
-        //         if (input->pressed.insert(event.key.key).second)
-        //         {
-        //             input->just_pressed.insert(event.key.key);
-        //         }
-        //         break;
-        //     case SDL_EVENT_KEY_UP:
-        //         if (input->pressed.erase(event.key.key) != 0)
-        //         {
-        //             input->just_released.insert(event.key.key);
-        //         }
-        //         break;
-        //     }
-        // }
+        auto* input = &registry.ctx().get<ButtonInput>();
+        if (Hall::GetLeft(0))
+            input->pressed.insert(Key::Left);
+        else
+            input->pressed.erase(Key::Left);
+
+        if (Hall::GetRight(0))
+            input->pressed.insert(Key::Right);
+        else
+            input->pressed.erase(Key::Right);
 
         if (registry.ctx().get<Game>().time != 0)
         {

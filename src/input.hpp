@@ -1,10 +1,15 @@
 #pragma once
 
+#include <cstdint>
 #include <set>
+
+enum Key : uint8_t
+{
+    Left,
+    Right
+};
 
 struct ButtonInput
 {
-    std::set<int> pressed;
-    std::set<int> just_pressed;
-    std::set<int> just_released;
+    std::set<Key> pressed;
 };
