@@ -5,6 +5,7 @@
 #include "physics.hpp"
 #include "render.hpp"
 
+#include <Hall/Hall.h>
 #include <entt/entt.hpp>
 
 void increment_ticks(entt::registry& registry)
@@ -85,10 +86,11 @@ int main()
         PhysicsModule::RemoveCollisionMarker(registry);
         PhysicsModule::CollisionCheck(registry);
 
-        // SDL_RenderClear(sdl_handles.renderer);
+        Hall::Clear(0);
         RenderModule::RenderSprites(registry);
         RenderModule::RenderScore(registry);
-        // SDL_RenderPresent(sdl_handles.renderer);
+        Hall::SetCommandSwapBuffers();
+        Hall::GetVSync();
     }
 
     return 0;

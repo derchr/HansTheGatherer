@@ -14,7 +14,8 @@ struct TextureAtlasLayout
 
 struct Texture
 {
-    // SDL_Texture* sdl_texture;
+    uint8_t* data;
+    uint32_t data_length;
     TextureAtlasLayout texture_atlas_layout;
 };
 

@@ -5,6 +5,8 @@
 #include "physics.hpp"
 #include "sprite.hpp"
 
+#include <Hall/Hall.h>
+
 #include <format>
 
 RenderModule::RenderModule(entt::registry& registry)
@@ -13,47 +15,29 @@ RenderModule::RenderModule(entt::registry& registry)
 
 void RenderModule::RenderSprites(entt::registry& registry)
 {
-    // auto const& sdl_handles = registry.ctx().get<SdlHandles>();
     auto const& game = registry.ctx().get<Game>();
     auto sprites_view =
         registry.view<Position const, Size const, Sprite const>(entt::exclude<Background>);
     auto background_view = registry.view<Position const, Size const, Sprite const, Background>();
 
-    for (auto [entity, pos, size, sprite] : background_view.each())
-    {
+    auto render_sprite = [](entt::entity entity, Position const& pos, Size const& size, Sprite const&sprite){
         TextureAtlasLayout layout = sprite.texture->texture_atlas_layout;
         uint8_t row = sprite.texture_atlas_index / layout.columns;
         uint8_t column = sprite.texture_atlas_index % layout.columns;
-        // SDL_FRect srcrect{static_cast<float>(column * layout.width),
-        //                   static_cast<float>(row * layout.height),
-        //                   static_cast<float>(layout.width),
-        //                   static_cast<float>(layout.height)};
+        // Problemchen: Wir können die Sprites nicht strecken... hat keiner Interpolation
+        // implementiert?
+        Hall::Draw(reinterpret_cast<unsigned short*>(sprite.texture->data), // Das ist 100% UB
+                   column * layout.width,
+                   row * layout.height,
+                   pos.x,
+                   pos.y,
+                   layout.width,
+                   layout.height,
+                   sprite.texture->data_length);
+    };
 
-        // SDL_FRect dstrect{static_cast<float>(pos.x),
-        //                   static_cast<float>(pos.y),
-        //                   static_cast<float>(size.w),
-        //                   static_cast<float>(size.h)};
-
-        // SDL_RenderTexture(sdl_handles.renderer, sprite.texture->sdl_texture, &srcrect, &dstrect);
-    }
-
-    for (auto [entity, pos, size, sprite] : sprites_view.each())
-    {
-        TextureAtlasLayout layout = sprite.texture->texture_atlas_layout;
-        uint8_t row = sprite.texture_atlas_index / layout.columns;
-        uint8_t column = sprite.texture_atlas_index % layout.columns;
-        // SDL_FRect srcrect{static_cast<float>(column * layout.width),
-        //                   static_cast<float>(row * layout.height),
-        //                   static_cast<float>(layout.width),
-        //                   static_cast<float>(layout.height)};
-
-        // SDL_FRect dstrect{static_cast<float>(pos.x),
-        //                   static_cast<float>(pos.y),
-        //                   static_cast<float>(size.w),
-        //                   static_cast<float>(size.h)};
-
-        // SDL_RenderTexture(sdl_handles.renderer, sprite.texture->sdl_texture, &srcrect, &dstrect);
-    }
+    background_view.each(render_sprite);
+    sprites_view.each(render_sprite);
 }
 
 void RenderModule::RenderScore(entt::registry& registry)
