@@ -84,16 +84,16 @@ AssetModule::AssetModule(entt::registry& registry)
     // auto renderer = registry.ctx().get<SdlHandles>().renderer;
 
     // auto* background = load_texture(BACKGROUND_DATA, sizeof(BACKGROUND_DATA), renderer);
-    TextureAtlasLayout background_layout = {.width = 866, .height = 510, .rows = 1, .columns = 1};
+    TextureAtlasLayout background_layout = {.width = 400, .height = 240, .rows = 1, .columns = 1};
 
     // auto* fruits = load_texture(FRUITS_DATA, sizeof(FRUITS_DATA), renderer);
-    TextureAtlasLayout fruits_layout = {.width = 16, .height = 16, .rows = 6, .columns = 38};
+    TextureAtlasLayout fruits_layout = {.width = 32, .height = 32, .rows = 6, .columns = 38};
 
     // auto* spiders = load_texture(SPIDERS_DATA, sizeof(SPIDERS_DATA), renderer);
-    TextureAtlasLayout spiders_layout = {.width = 16, .height = 16, .rows = 2, .columns = 4};
+    TextureAtlasLayout spiders_layout = {.width = 32, .height = 32, .rows = 2, .columns = 4};
 
     // auto* basket = load_texture(BASKET_DATA, sizeof(BASKET_DATA), renderer);
-    TextureAtlasLayout basket_layout = {.width = 16, .height = 16, .rows = 1, .columns = 1};
+    TextureAtlasLayout basket_layout = {.width = 64, .height = 32, .rows = 1, .columns = 1};
 
     // registry.ctx().emplace<TextureAssets>(TextureAssets{
     //     .background = Texture{.sdl_texture = background, .texture_atlas_layout =
