@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.24)
 
-project(HansTheGatherer)
+set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/cmake/riscv-toolchain.cmake)
+
+project(HansTheGatherer C CXX ASM)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-# Option to switch real platform vs. SDL implementation...
 
 include(FetchContent)
 
@@ -14,7 +14,23 @@ FetchContent_Declare(
     OVERRIDE_FIND_PACKAGE
 )
 FetchContent_MakeAvailable(entt)
+
 find_package(entt CONFIG REQUIRED)
+
+add_library(RISCV_Options INTERFACE)
+target_compile_options(RISCV_Options INTERFACE
+  -fno-exceptions
+  -fno-unwind-tables
+  -fno-rtti
+  -fno-pic # PIC?
+  -mno-relax
+  -march=rv32im
+  -mabi=ilp32
+  -std=c++20
+)
+
+add_subdirectory(lib)
+add_subdirectory(wuehans)
 
 add_executable(HansTheGatherer
     src/main.cpp
@@ -25,6 +41,20 @@ add_executable(HansTheGatherer
     src/render.cpp
 )
 
-target_link_libraries(HansTheGatherer EnTT)
+target_link_options(HansTheGatherer PRIVATE
+  -nostartfiles
+  -Wl,--gc-sections
+  -march=rv32im
+  -mabi=ilp32
+  -lstdc++
+  -lc
+  -lgcc
+  -mcmodel=medany
+)
 
-set_property(TARGET HansTheGatherer PROPERTY CXX_STANDARD 20)
+target_link_libraries(HansTheGatherer PRIVATE
+    RISCV_Options
+    WueHans
+    Hall
+    EnTT
+)
