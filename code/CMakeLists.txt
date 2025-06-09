@@ -22,6 +22,7 @@ add_compile_options(
   -Bstatic
   -nostdinc
   -fno-builtin
+  -mcmodel=medany
   # -std=c++20
 )
 
@@ -33,6 +34,7 @@ add_link_options(
   -Bstatic
   -nostdlib
   -fno-builtin
+  -mcmodel=medany
 )
 
 add_executable (Game.elf)

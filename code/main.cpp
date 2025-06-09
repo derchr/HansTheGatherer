@@ -24,12 +24,12 @@ int main()
 {
     printf("Main\n");
 
-    Hall::Clear(0xFFFFF);
+    Hall::Clear((unsigned short) 0xFFFFF);
     while (Hall::GetIsGPUBusy())
     {
     }
     Hall::SetCommandSwapBuffers();
-    Hall::Clear(0xFFFFF);
+    Hall::Clear((unsigned short) 0xFFFFF);
     while (Hall::GetIsGPUBusy())
     {
     }
