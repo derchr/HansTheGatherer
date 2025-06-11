@@ -26,7 +26,7 @@ void RenderModule::RenderSprites(entt::registry& registry)
         TextureAtlasLayout layout = sprite.texture->texture_atlas_layout;
         uint8_t row = sprite.texture_atlas_index / layout.columns;
         uint8_t column = sprite.texture_atlas_index % layout.columns;
-
+        while (Hall::GetIsGPUBusy());
         Hall::Draw(sprite.texture->data,
                    column * layout.width,
                    row * layout.height,
