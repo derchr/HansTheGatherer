@@ -34,7 +34,7 @@ void RenderModule::RenderSprites(entt::registry& registry)
                    pos.y,
                    layout.width,
                    layout.height,
-                   sprite.texture->data_length);
+                   sprite.texture->width);
     };
 
     background_view.each(render_sprite);

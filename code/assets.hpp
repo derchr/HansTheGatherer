@@ -15,7 +15,8 @@ struct TextureAtlasLayout
 struct Texture
 {
     const unsigned short* data;
-    uint32_t data_length;
+    int width;
+    int height;
     TextureAtlasLayout texture_atlas_layout;
 };
 

@@ -13,17 +13,21 @@ AssetModule::AssetModule(entt::registry& registry)
     TextureAtlasLayout fruits_layout{.width = 32, .height = 32, .rows = 6, .columns = 38};
     TextureAtlasLayout spiders_layout{.width = 32, .height = 32, .rows = 2, .columns = 4};
     TextureAtlasLayout basket_layout{.width = 64, .height = 32, .rows = 1, .columns = 1};
-    Texture background{.data = reinterpret_cast<const unsigned short*>(jungle_data),
-                       .data_length = sizeof(jungle_data),
+    Texture background{.data = jungle_data,
+                       .width = JUNGLE_WIDTH,
+                       .height = JUNGLE_HEIGHT,
                        .texture_atlas_layout = background_layout};
-    Texture fruits{.data = reinterpret_cast<const unsigned short*>(fruits_data),
-                   .data_length = sizeof(fruits_data),
+    Texture fruits{.data = fruits_data,
+                   .width = FRUITS_WIDTH,
+                   .height = FRUITS_HEIGHT,
                    .texture_atlas_layout = fruits_layout};
-    Texture spiders{.data = reinterpret_cast<const unsigned short*>(spiders_data),
-                    .data_length = sizeof(spiders_data),
+    Texture spiders{.data = spiders_data,
+                    .width = SPIDERS_WIDTH,
+                    .height = SPIDERS_HEIGHT,
                     .texture_atlas_layout = spiders_layout};
-    Texture basket{.data = reinterpret_cast<const unsigned short*>(basket_data),
-                   .data_length = sizeof(basket_data),
+    Texture basket{.data = basket_data,
+                    .width = BASKET_WIDTH,
+                    .height = BASKET_HEIGHT,
                    .texture_atlas_layout = basket_layout};
 
     registry.ctx().emplace<TextureAssets>(TextureAssets{

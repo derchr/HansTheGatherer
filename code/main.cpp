@@ -22,17 +22,6 @@ void increment_ticks(entt::registry& registry)
 
 int main()
 {
-    Hall::Clear((unsigned short) 0xFFFFF);
-    while (Hall::GetIsGPUBusy())
-    {
-    }
-    Hall::SetCommandSwapBuffers();
-    Hall::Clear((unsigned short) 0xFFFFF);
-    while (Hall::GetIsGPUBusy())
-    {
-    }
-    Hall::SetCommandSwapBuffers();
-
     entt::registry registry;
 
     registry.ctx().emplace<Game>(Game{.ticks = 0, .time = 60, .score = 0, .random_engine = {}});
