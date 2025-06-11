@@ -50,26 +50,6 @@ int _write(int fd, char *ptr, int len) {
     int b = *x;
     // HACK: Hackerman Ende
     return written;
-  } else if (fd == 2) {
-    FIL write_file;
-    FRESULT fr = f_open(&write_file, STDERR, FA_OPEN_APPEND | FA_WRITE);
-    if (fr != 0) {
-      return fr;
-    }
-
-    UINT written = 0;
-    fr = f_write(&write_file, ptr, len, &written);
-    if (fr != 0) {
-      return -1;
-    }
-
-    f_close(&write_file);
-
-    // HACK: Hackerman
-    volatile int* x = (int*) 0x80000000;
-    int b = *x;
-    // HACK: Hackerman Ende
-    return written;
   } else if (fd > 2 && (fd-3) < FILE_AMOUNT && fd_data[fd-3].is_open) {
     UINT bw = 0;
     f_write(&fd_data[fd-3].fp, ptr, len, &bw);
@@ -106,6 +86,8 @@ void *_sbrk(int incr) {
   }
   else {
     printf("NOMEM\n");
+    errno = ENOMEM;
+    return (void*) -1;
   }
 
   return prev_heap;
