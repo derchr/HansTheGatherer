@@ -1,0 +1,32 @@
+{
+	"files.associations": {
+		"deque": "cpp",
+		"list": "cpp",
+		"map": "cpp",
+		"unordered_map": "cpp",
+		"vector": "cpp",
+		"xhash": "cpp",
+		"xstring": "cpp",
+		"xtree": "cpp",
+		"string": "cpp",
+		"unordered_set": "cpp",
+		"rope": "cpp",
+		"slist": "cpp",
+		"forward_list": "cpp",
+		"array": "cpp",
+		"ranges": "cpp",
+		"span": "cpp",
+		"xutility": "cpp",
+		"string_view": "cpp",
+		"chrono": "cpp",
+		"filesystem": "cpp",
+		"format": "cpp",
+		"functional": "cpp",
+		"regex": "cpp",
+		"type_traits": "cpp",
+		"xlocale": "cpp",
+		"xmemory": "cpp",
+		"limits": "cpp",
+		"cstdint": "cpp"
+	}
+}

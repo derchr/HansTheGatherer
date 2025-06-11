@@ -26,9 +26,8 @@ void RenderModule::RenderSprites(entt::registry& registry)
         TextureAtlasLayout layout = sprite.texture->texture_atlas_layout;
         uint8_t row = sprite.texture_atlas_index / layout.columns;
         uint8_t column = sprite.texture_atlas_index % layout.columns;
-        // Problemchen: Wir können die Sprites nicht strecken... hat keiner Interpolation
-        // implementiert?
-        Hall::Draw(reinterpret_cast<unsigned short const*>(sprite.texture->data), // Das ist 100% UB
+
+        Hall::Draw(sprite.texture->data,
                    column * layout.width,
                    row * layout.height,
                    pos.x,

@@ -22,8 +22,6 @@ void increment_ticks(entt::registry& registry)
 
 int main()
 {
-    printf("Main\n");
-
     Hall::Clear((unsigned short) 0xFFFFF);
     while (Hall::GetIsGPUBusy())
     {
@@ -35,36 +33,34 @@ int main()
     }
     Hall::SetCommandSwapBuffers();
 
-    printf("before reg\n");
     entt::registry registry;
-    printf("after reg\n");
 
     registry.ctx().emplace<Game>(Game{.ticks = 0, .time = 60, .score = 0, .random_engine = {}});
     registry.ctx().emplace<ButtonInput>(ButtonInput{});
 
-    printf("before modules\n");
     AssetModule asset_module(registry);
-    printf("asset_module\n");
+
     AudioModule audio_module(registry);
-    printf("audio_module\n");
+
     RenderModule render_module(registry);
-    printf("render_module\n");
+
     PhysicsModule physics_module(registry);
-    printf("physics_module\n");
+
     LevelModule level_module(registry);
 
     bool exit_gameloop = false;
-    printf("Enter game loop\n");
+
     while (!exit_gameloop)
     {
         // Input
         auto* input = &registry.ctx().get<ButtonInput>();
-        if (Hall::GetLeft(0))
+        unsigned short controller = Hall::GetController(0);
+        if (Hall::GetLeft(controller))
             input->pressed.insert(Key::Left);
         else
             input->pressed.erase(Key::Left);
 
-        if (Hall::GetRight(0))
+        if (Hall::GetRight(controller))
             input->pressed.insert(Key::Right);
         else
             input->pressed.erase(Key::Right);
@@ -95,7 +91,6 @@ int main()
         while (!Hall::GetVSync())
             ;
 
-        printf("finished iteration\n");
     }
 
     return 0;

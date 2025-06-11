@@ -15,8 +15,6 @@ int main()
     }
     Hall::SetCommandSwapBuffers();
 
-    // printf("Hallo Welt!\n");
-
     while (1)
     {
     }

@@ -15,16 +15,13 @@ LevelModule::LevelModule(entt::registry& registry)
     //                   audio_assets->background_music.buffer_length / (2 * 2),
     //                   0,
     //                   audio_assets->background_music.buffer_length / (2 * 2));
-    printf("background\n");
     auto background = registry.create();
-    printf("after create\n");
     registry.emplace<Position>(background, Position{.x = 0, .y = 0});
     registry.emplace<Sprite>(
         background, Sprite{.texture = &texture_assets->background, .texture_atlas_index = 0});
     registry.emplace<Size>(background, Size{.w = WINDOW_WIDTH, .h = WINDOW_HEIGHT});
     registry.emplace<Background>(background);
 
-    printf("basket\n");
     auto basket = registry.create();
     registry.emplace<WorldPosition>(basket);
     registry.emplace<Position>(basket,
@@ -34,7 +31,6 @@ LevelModule::LevelModule(entt::registry& registry)
     registry.emplace<Size>(basket, Size{.w = 64, .h = 32});
     registry.emplace<Basket>(basket);
 
-    printf("basket_cb\n");
     auto basket_cb = registry.create();
     registry.emplace<WorldPosition>(basket_cb);
     registry.emplace<Position>(basket_cb, Position{.x = 0, .y = 16});
