@@ -51,14 +51,14 @@ void LevelModule::MoveBasket(entt::registry& registry)
 
     for (auto [entity, pos, size, sprite] : basket_view.each())
     {
-        // if (input.pressed.contains(SDLK_LEFT))
-        // {
-        //     pos.x -= 5;
-        // }
-        // if (input.pressed.contains(SDLK_RIGHT))
-        // {
-        //     pos.x += 5;
-        // }
+        if (input.pressed.find(Key::Left) != input.pressed.end())
+        {
+            pos.x -= 5;
+        }
+        if (input.pressed.find(Key::Right) != input.pressed.end())
+        {
+            pos.x += 5;
+        }
 
         pos.x = pos.x < 0 ? 0 : pos.x;
         pos.x = pos.x > WINDOW_WIDTH - size.w ? WINDOW_WIDTH - size.w : pos.x;
