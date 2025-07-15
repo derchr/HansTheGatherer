@@ -2,53 +2,39 @@ cmake_minimum_required(VERSION 3.24.0)
 enable_language(C CXX ASM)
 project("Cool game")
 
+if(NOT DESKTOPBUILD)
+  set(FINAL_TARGET game.elf)
+else()
+  set(FINAL_TARGET game)
+endif()
+
+
 FetchContent_Declare(
     entt
     URL https://github.com/skypjack/entt/archive/refs/tags/v3.15.0.tar.gz
     OVERRIDE_FIND_PACKAGE
 )
 FetchContent_MakeAvailable(entt)
-
 find_package(entt CONFIG REQUIRED)
 
-add_compile_options(
-  -fno-exceptions
-  -nostdlib
-  -fno-unwind-tables
-  -fno-rtti
-  -march=rv32im
-  -Os
-  # -ffreestanding
-  -Bstatic
-  -nostdinc
-  -fno-builtin
-  -mcmodel=medany
-  # -std=c++20
+
+set(CMAKE_CXX_STANDARD 20)
+set(CXX_STANDARD_REQUIRED ON)
+
+add_executable(${FINAL_TARGET})
+
+add_custom_target(copy_assets
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/cmake_copy.cmake
 )
+add_dependencies(${FINAL_TARGET} copy_assets)
 
-add_link_options(
-  -nostdlib
-  -T ${WUEHANS_LINKERSCRIPT}
-  -Wl,--gc-sections
-  # -ffreestanding
-  -Bstatic
-  -nostdlib
-  -fno-builtin
-  -mcmodel=medany
-)
 
-add_executable (Game.elf)
+if(NOT DESKTOPBUILD)
+  target_include_directories(${FINAL_TARGET}
+  PRIVATE include
+  )
 
-target_include_directories(Game.elf
-  PUBLIC SYSTEM ${WUEHANS_ROOT}/system-include/libstdc++
-  PUBLIC SYSTEM ${WUEHANS_ROOT}/system-include/libstdc++/riscv32-unknown-elf
-  PUBLIC SYSTEM ${WUEHANS_ROOT}/system-include
-  PUBLIC SYSTEM ${WUEHANS_ROOT}/lib
-  PUBLIC SYSTEM ${WUEHANS_ROOT}/wuehans
-  PUBLIC SYSTEM ${WUEHANS_ROOT}/system-include/newlib # This needs to be after libstdc++ because of include_nexts - JH
-)
-
-target_link_libraries(Game.elf
+  target_link_libraries(${FINAL_TARGET}
   ${WUEHANS_ROOT}/lib/newlib/libc.a
   ${WUEHANS_ROOT}/lib/newlib/libg.a
   ${WUEHANS_ROOT}/lib/newlib/libgloss.a
@@ -57,14 +43,40 @@ target_link_libraries(Game.elf
   ${WUEHANS_ROOT}/lib/libstdc++.a
   ${WUEHANS_ROOT}/lib/libsupc++.a
   fatfs
-  Hall
+  Halib
   EnTT
+  )
+
+  target_sources(${FINAL_TARGET} PUBLIC
+  PUBLIC ${WUEHANS_ROOT}/wuehans/start.S
+  PUBLIC ${WUEHANS_ROOT}/wuehans/start.cpp
+  PUBLIC ${WUEHANS_ROOT}/wuehans/syscall.c
+  )
+
+  target_compile_definitions(${FINAL_TARGET} PRIVATE WUEHANS)
+
+else()
+  target_link_libraries(${FINAL_TARGET}
+  Halib_Desktop
+  EnTT
+  )
+
+  target_compile_definitions(${FINAL_TARGET} PRIVATE DESKTOP)
+endif()
+
+target_include_directories(${FINAL_TARGET}
+  PUBLIC SYSTEM ${WUEHANS_ROOT}/wuehans
+  PRIVATE include
 )
 
-target_sources(Game.elf PUBLIC
-  PUBLIC ${WUEHANS_ROOT}/wuehans/start.S
-  PUBLIC ${WUEHANS_ROOT}/wuehans/syscall.c
+#███████████████████████████████████████████████████████████
+#███████████████████████████████████████████████████████████
+#█████████████ Below starts your realm █████████████████████
+#███████████████████████████████████████████████████████████
+#███████████████████████████████████████████████████████████
 
+
+target_sources(${FINAL_TARGET} PUBLIC
   # Add your .cpp files here
   main.cpp
   audio.cpp
@@ -73,3 +85,11 @@ target_sources(Game.elf PUBLIC
   physics.cpp
   render.cpp
 )
+
+# This is stuff for debugging the hardware. Just ignore it :)
+# add_custom_command(TARGET ${FINAL_TARGET} POST_BUILD
+#	COMMAND objcopy ARGS -O verilog ${FINAL_TARGET} Game.hex)
+#
+# add_custom_command(TARGET ${FINAL_TARGET} POST_BUILD
+#	COMMAND python ARGS ${WUEHANS_ROOT}/wuehans/hex8tohex32.py Game.hex > Game32.hex
+#)

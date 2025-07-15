@@ -1,2 +1,13 @@
-.cache/
-build/
+.DS_Store
+.idea
+*.log
+tmp/
+
+build/*
+!build/build.ninja
+!build/wueHans
+build/wueHans/*
+!build/wueHans/dummy.txt
+!build/Desktop
+build/Desktop/*
+!build/Desktop/dummy.txt
