@@ -8,6 +8,7 @@
 #include <Hall/Hall.h>
 #include <entt/entt.hpp>
 #include <iostream>
+#include "Halib/Halib.h"
 
 void increment_ticks(entt::registry& registry)
 {
@@ -20,8 +21,14 @@ void increment_ticks(entt::registry& registry)
     }
 }
 
+void Halib::DrawUI()
+{
+    
+}
+
 int main()
 {
+    Halib::Init();
     entt::registry registry;
 
     registry.ctx().emplace<Game>(Game{.ticks = 0, .time = 60, .score = 0, .random_engine = {}});
@@ -39,7 +46,7 @@ int main()
 
     bool exit_gameloop = false;
 
-    while (!exit_gameloop)
+    while (!Halib::GetShouldClose())
     {
         // Input
         auto* input = &registry.ctx().get<ButtonInput>();
