@@ -23,6 +23,7 @@ typedef struct FD_Data FD_Data;
 static FD_Data fd_data[FILE_AMOUNT];
 
 int _write(int fd, char *ptr, int len) {
+  return 0;
   if (is_mounted == 0) {
     f_mount(&FatFs, "", 0);
     is_mounted = 1;
