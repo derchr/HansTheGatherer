@@ -29,8 +29,7 @@ endif()
 include(FetchContent)
 FetchContent_Declare(Halib
     GIT_REPOSITORY https://github.com/byter64/Halib.git
-    GIT_TAG main
-    #GIT_TAG develop #For the devs only :)
+    GIT_TAG v3.1
 )
 FetchContent_MakeAvailable(Halib)
 
